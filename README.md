@@ -10,7 +10,7 @@
 [![Live site](https://img.shields.io/badge/live-ave.bawbel.io-0a3024?style=flat-square&logo=googlechrome&logoColor=d4a017)](https://ave.bawbel.io)
 [![Deploy](https://img.shields.io/github/actions/workflow/status/bawbel/ave-site/deploy.yml?style=flat-square&label=deploy&color=0f6e56)](https://github.com/bawbel/ave-site/actions/workflows/deploy.yml)
 [![AVE standard](https://img.shields.io/badge/standard-bawbel%2Fave-0a3024?style=flat-square)](https://github.com/bawbel/ave)
-[![Records](https://img.shields.io/badge/records-51-0f6e56?style=flat-square)](https://ave.bawbel.io/registry.html)
+[![Records](https://img.shields.io/badge/records-59-0f6e56?style=flat-square)](https://ave.bawbel.io/registry.html)
 [![Schema](https://img.shields.io/badge/schema-v1.0.0-d4a017?style=flat-square)](https://ave.bawbel.io/schema.html)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green?style=flat-square)](LICENSE)
 
