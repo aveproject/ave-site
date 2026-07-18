@@ -371,11 +371,11 @@ function openDrawer(r){
         <h4>Cite this record</h4>
         <button class="copy" id="citebtn">Copy</button>
       </div>
-      <div class="ref" id="citeref">${r.ave_id}: ${r.title}. Agentic Vulnerability Enumeration (AVE), Bawbel/AVE Project. <span class="pl">https://api.piranha.bawbel.io/records/${r.ave_id}</span></div>
+      <div class="ref" id="citeref">${r.ave_id}: ${r.title}. Agentic Vulnerability Enumeration (AVE). <span class="pl">https://github.com/aveproject/ave/blob/main/records/${r.ave_id}.json</span></div>
       <div class="ref-sub">Browse this record: <a href="registry.html#${r.ave_id}">aveproject.org/registry.html#${r.ave_id}</a></div>
     </div>`;
   // cite: copy canonical reference; also set a per-record permalink hash
-  const citeText = `${r.ave_id}: ${r.title}. Agentic Vulnerability Enumeration (AVE), Bawbel/AVE Project. https://api.piranha.bawbel.io/records/${r.ave_id}`;
+  const citeText = `${r.ave_id}: ${r.title}. Agentic Vulnerability Enumeration (AVE). https://github.com/aveproject/ave/blob/main/records/${r.ave_id}.json`;
   history.replaceState(null,'',`#${r.ave_id}`);
   const cb = document.getElementById('citebtn');
   if(cb){ cb.addEventListener('click', ()=>{
