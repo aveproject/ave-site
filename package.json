@@ -1,7 +1,7 @@
 {
   "name": "ave-site",
   "version": "1.0.0",
-  "description": "Website for the AVE (Agentic Vulnerability Enumeration) open standard — ave.bawbel.io",
+  "description": "Website for the AVE (Agentic Vulnerability Enumeration) open standard — aveproject.org",
   "private": true,
   "scripts": {
     "build": "node scripts/build-records.js",

@@ -7,14 +7,14 @@
 <meta name="description" content="Search and filter every AVE behavioral classification record by severity, attack class, detection layer, and framework mapping. Includes AIVSS scores, IOCs, provenance, and MITRE ATLAS cross-references.">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#0a3024">
-<link rel="canonical" href="https://ave.bawbel.io/registry.html">
+<link rel="canonical" href="https://aveproject.org/registry.html">
 
 <!-- Open Graph / social sharing -->
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://ave.bawbel.io/registry.html">
+<meta property="og:url" content="https://aveproject.org/registry.html">
 <meta property="og:title" content="Behavioral Classification Registry — AVE">
 <meta property="og:description" content="Search and filter every AVE behavioral classification record by severity, attack class, detection layer, and framework mapping. Includes AIVSS scores, IOCs, provenance, and MITRE ATLAS cross-references.">
-<meta property="og:image" content="https://ave.bawbel.io/ave-favicon-512.png">
+<meta property="og:image" content="https://aveproject.org/ave-favicon-512.png">
 <meta property="og:image:width" content="512">
 <meta property="og:image:height" content="512">
 <meta property="og:site_name" content="AVE — Agentic Vulnerability Enumeration">
@@ -24,7 +24,7 @@
 <meta name="twitter:site" content="@bawbel_io">
 <meta name="twitter:title" content="Behavioral Classification Registry — AVE">
 <meta name="twitter:description" content="Search and filter every AVE behavioral classification record by severity, attack class, detection layer, and framework mapping. Includes AIVSS scores, IOCs, provenance, and MITRE ATLAS cross-references.">
-<meta name="twitter:image" content="https://ave.bawbel.io/ave-favicon-512.png">
+<meta name="twitter:image" content="https://aveproject.org/ave-favicon-512.png">
 
 <!-- Favicons -->
 <link rel="icon" href="/favicon.ico" sizes="any">
@@ -48,7 +48,7 @@
   "@context": "https://schema.org",
   "@type": "WebSite",
   "name": "AVE — Agentic Vulnerability Enumeration",
-  "url": "https://ave.bawbel.io",
+  "url": "https://aveproject.org",
   "description": "The behavioral classification standard for agentic AI components.",
   "publisher": {
     "@type": "Organization",
@@ -56,7 +56,7 @@
     "url": "https://bawbel.io",
     "logo": {
       "@type": "ImageObject",
-      "url": "https://ave.bawbel.io/ave-favicon-512.png",
+      "url": "https://aveproject.org/ave-favicon-512.png",
       "width": 512,
       "height": 512
     }
@@ -65,7 +65,7 @@
     "@type": "SearchAction",
     "target": {
       "@type": "EntryPoint",
-      "urlTemplate": "https://ave.bawbel.io/registry.html?q={{search_term_string}}"
+      "urlTemplate": "https://aveproject.org/registry.html?q={{search_term_string}}"
     },
     "query-input": "required name=search_term_string"
   }
@@ -167,7 +167,7 @@ and detection layer; click any row for full detail, AIVSS scoring, and provenanc
       <div class="lic">
         <p><b>AVE is an open standard.</b> The schema and records are published under Apache 2.0. AVE is moving toward neutral governance under an independent standards body &mdash; it is meant to outlive any single implementation, including Bawbel's.</p>
         <p>Maps to OWASP MCP Top 10 &middot; OWASP Agentic AI Top 10 &middot; MITRE ATLAS &middot; OWASP AIVSS v0.8. The open record set can be consumed by any tool.</p>
-        <p class="citing"><b>Citing AVE.</b> Reference a record by its id, which is permanent and never reused: <span class="cmono">AVE-YYYY-NNNNN: Title. Agentic Vulnerability Enumeration (AVE), Bawbel/AVE Project. https://ave.bawbel.io/registry.html#AVE-YYYY-NNNNN</span></p>
+        <p class="citing"><b>Citing AVE.</b> Reference a record by its id, which is permanent and never reused: <span class="cmono">AVE-YYYY-NNNNN: Title. Agentic Vulnerability Enumeration (AVE), Bawbel/AVE Project. https://aveproject.org/registry.html#AVE-YYYY-NNNNN</span></p>
       </div>
       <div class="links">
         <div>
@@ -371,11 +371,11 @@ function openDrawer(r){
         <h4>Cite this record</h4>
         <button class="copy" id="citebtn">Copy</button>
       </div>
-      <div class="ref" id="citeref">${r.ave_id}: ${r.title}. Agentic Vulnerability Enumeration (AVE), Bawbel/AVE Project. <span class="pl">https://api.piranha.bawbel.io/records/${r.ave_id}</span></div>
-      <div class="ref-sub">Browse this record: <a href="registry.html#${r.ave_id}">ave.bawbel.io/registry.html#${r.ave_id}</a></div>
+      <div class="ref" id="citeref">${r.ave_id}: ${r.title}. Agentic Vulnerability Enumeration (AVE). <span class="pl">https://github.com/aveproject/ave/blob/main/records/${r.ave_id}.json</span></div>
+      <div class="ref-sub">Browse this record: <a href="registry.html#${r.ave_id}">aveproject.org/registry.html#${r.ave_id}</a></div>
     </div>`;
   // cite: copy canonical reference; also set a per-record permalink hash
-  const citeText = `${r.ave_id}: ${r.title}. Agentic Vulnerability Enumeration (AVE), Bawbel/AVE Project. https://api.piranha.bawbel.io/records/${r.ave_id}`;
+  const citeText = `${r.ave_id}: ${r.title}. Agentic Vulnerability Enumeration (AVE). https://github.com/aveproject/ave/blob/main/records/${r.ave_id}.json`;
   history.replaceState(null,'',`#${r.ave_id}`);
   const cb = document.getElementById('citebtn');
   if(cb){ cb.addEventListener('click', ()=>{
