@@ -1,17 +1,17 @@
 <div align="center">
 
-<img src="https://ave.bawbel.io/ave-logo-full.svg" alt="AVE — Agentic Vulnerability Enumeration" width="320" />
+<img src="https://aveproject.org/ave-logo-full.svg" alt="AVE — Agentic Vulnerability Enumeration" width="320" />
 
 <br/>
 <br/>
 
 **Website for the [AVE](https://github.com/bawbel/ave) open standard — the behavioral classification standard for agentic AI components.**
 
-[![Live site](https://img.shields.io/badge/live-ave.bawbel.io-0a3024?style=flat-square&logo=googlechrome&logoColor=d4a017)](https://ave.bawbel.io)
+[![Live site](https://img.shields.io/badge/live-aveproject.org-0a3024?style=flat-square&logo=googlechrome&logoColor=d4a017)](https://aveproject.org)
 [![Deploy](https://img.shields.io/github/actions/workflow/status/bawbel/ave-site/deploy.yml?style=flat-square&label=deploy&color=0f6e56)](https://github.com/bawbel/ave-site/actions/workflows/deploy.yml)
 [![AVE standard](https://img.shields.io/badge/standard-bawbel%2Fave-0a3024?style=flat-square)](https://github.com/bawbel/ave)
-[![Records](https://img.shields.io/badge/records-51-0f6e56?style=flat-square)](https://ave.bawbel.io/registry.html)
-[![Schema](https://img.shields.io/badge/schema-v1.0.0-d4a017?style=flat-square)](https://ave.bawbel.io/schema.html)
+[![Records](https://img.shields.io/badge/records-59-0f6e56?style=flat-square)](https://aveproject.org/registry.html)
+[![Schema](https://img.shields.io/badge/schema-v1.0.0-d4a017?style=flat-square)](https://aveproject.org/schema.html)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green?style=flat-square)](LICENSE)
 
 </div>
@@ -20,7 +20,7 @@
 
 ## What this repo is
 
-This repo contains the website only — HTML, CSS, JS, and assets for `ave.bawbel.io`. It is a **consumer** of the AVE standard, not part of the standard itself.
+This repo contains the website only — HTML, CSS, JS, and assets for `aveproject.org`. It is a **consumer** of the AVE standard, not part of the standard itself.
 
 The records, schema, detection rules, and fixtures live in **[bawbel/ave](https://github.com/bawbel/ave)**. Pushing new AVE records to that repo automatically triggers a rebuild and deployment of this site via GitHub Actions `repository_dispatch`.
 
@@ -151,7 +151,7 @@ deploys the site within a few minutes. Remember: this updates `records.js` (and
 therefore the bottom OWASP/MITRE table) automatically — it does **not** update
 the three external crosswalks. See [Crosswalks](#crosswalks).
 
-**Custom domain:** Set `ave.bawbel.io` as the custom domain in GitHub Pages settings.
+**Custom domain:** Set `aveproject.org` as the custom domain in GitHub Pages settings.
 Add a CNAME record in Namecheap pointing `ave` to `bawbel.github.io`.
 
 ---
@@ -173,7 +173,7 @@ ave-site/
 │   ├── skillspector-to-ave.json
 │   ├── clawscan-to-ave.json
 │   └── ave-to-ast10.json
-├── CNAME                   Custom domain: ave.bawbel.io
+├── CNAME                   Custom domain: aveproject.org
 ├── manifest.json           PWA manifest (root level — distinct from crosswalks/manifest.json)
 ├── robots.txt
 ├── sitemap.xml
