@@ -129,7 +129,7 @@ different tools become comparable through a shared vocabulary.</p>
     <h2>AVE &rarr; OWASP &middot; MITRE ATLAS</h2>
     <p class="note">Every AVE record maps to the frameworks teams already trust. Generated from the record set.</p>
     <div class="tbl-wrap"><table class="ref">
-      <thead><tr><th>AVE id</th><th>Attack class</th><th>OWASP MCP</th><th>OWASP Agentic</th><th>MITRE ATLAS</th></tr></thead>
+      <thead><tr><th>AVE id</th><th>Attack class</th><th>OWASP MCP</th><th>OWASP Agentic</th><th>MITRE ATLAS</th><th>NIST AI RMF</th></tr></thead>
       <tbody id="fwrows"></tbody>
     </table></div>
     <p class="note" style="margin-top:18px;">Maintain a scanner? <a href="architecture.html">Map your finding types to AVE &rarr;</a></p>
@@ -338,12 +338,11 @@ window.RECORDS.forEach(r=>{
   if(!r.severity && r.aivss && r.aivss.aivss_severity) r.severity=r.aivss.aivss_severity;
   if(!r.aivss_score && r.aivss) r.aivss_score=r.aivss.aivss_score;
   if(!r.detection_layer) r.detection_layer='content';
-  if(!r.owasp_mcp && r.aivss && r.aivss.owasp_mcp_mapping) r.owasp_mcp=r.aivss.owasp_mcp_mapping;
 });
 window.RECORDS.slice().sort((a,b)=>a.ave_id<b.ave_id?-1:1).forEach(r=>{
   const tr=document.createElement('tr');
-  const j=a=>(a&&a.length)?a.join(', '):'—';
-  tr.innerHTML=`<td><span class="aveid">${r.ave_id}</span></td><td class="mono">${r.attack_class}</td><td class="mono">${j(r.owasp_mcp)}</td><td class="mono">${j(r.owasp_mapping)}</td><td class="mono">${j(r.mitre_atlas_mapping)}</td>`;
+  const j=a=>(a&&a.length)?a.join(', '):'\u2014';
+  tr.innerHTML=`<td><span class="aveid">${r.ave_id}</span></td><td class="mono">${r.attack_class}</td><td class="mono">${j(r.owasp_mcp)}</td><td class="mono">${j(r.owasp_asi)}</td><td class="mono">${j(r.mitre_atlas)}</td><td class="mono">${j(r.nist_ai_rmf)}</td>`;
   tb.appendChild(tr);
 });
 </script>
