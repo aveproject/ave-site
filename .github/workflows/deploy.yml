@@ -1,4 +1,4 @@
-name: Build and deploy ave.bawbel.io
+name: Build and deploy aveproject.org
 
 on:
   # Deploy when the site itself changes

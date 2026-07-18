@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://ave.bawbel.io/sitemap.xml
+Sitemap: https://aveproject.org/sitemap.xml
