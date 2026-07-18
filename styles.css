@@ -246,7 +246,8 @@
 
 /* doc prose (architecture, schema) */
 .doc { padding: 44px 0 70px; }
-.doc .wrap { max-width: 880px; }
+/* content width unified with main.registry via the shared .wrap rule;
+   .doc no longer sets its own max-width here */
 .doc h2 { font-size: 26px; margin: 38px 0 8px; letter-spacing: -0.01em; }
 .doc h2:first-child { margin-top: 0; }
 .doc h3 { font-size: 19px; margin: 28px 0 6px; }
@@ -342,7 +343,6 @@ img, svg { max-width: 100%; height: auto; }
 /* Doc prose and schema tables scroll on mobile */
 .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 @media (max-width: 680px) {
-  .doc .wrap { max-width: 100%; }
   .codeblock { font-size: 12px; }
   .xw-grid { grid-template-columns: 1fr; }
 }
