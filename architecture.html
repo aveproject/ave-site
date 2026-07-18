@@ -215,7 +215,7 @@ and a detailed view for developers and security engineers implementing the stand
               <div style="font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-top:4px">static_detection</div>
             </td>
             <td>Text body of the skill file, prompt file, or MCP tool description field</td>
-            <td><code>bawbel scan ./skill.md</code></td>
+            <td>A static file scanner, pre-execution</td>
             <td style="text-align:center;font-size:20px;font-weight:700;color:#0f6e56"><span data-layer-count="content">—</span><span style="font-size:12px;font-weight:400;color:var(--ink-3)"> / <span data-layer-total></span></span></td>
           </tr>
           <tr>
@@ -224,7 +224,7 @@ and a detailed view for developers and security engineers implementing the stand
               <div style="font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-top:4px">static_detection</div>
             </td>
             <td>MCP server manifest (<code>.well-known/mcp.json</code>), tool schemas, parameter descriptions</td>
-            <td><code>bawbel scan-server-card &lt;url&gt;</code></td>
+            <td>A server-card fetcher, before first tool call</td>
             <td style="text-align:center;font-size:20px;font-weight:700"><span data-layer-count="server_card">—</span><span style="font-size:12px;font-weight:400;color:var(--ink-3)"> / <span data-layer-total></span></span></td>
           </tr>
           <tr>
@@ -260,7 +260,7 @@ and a detailed view for developers and security engineers implementing the stand
     <div class="callout">
 
       <span class="k">Why runtime records are the hardest to defend</span>
-      <p>Several records are at the <code>runtime</code> layer — RAG injection, tool result manipulation, memory poisoning, A2A injection, context flooding, vision injection, REPL code mode, and async task poisoning. A static scanner cannot catch these because the malicious payload only exists during a live session. They require either a behavioral sandbox (run the agent and observe) or runtime monitoring (proxy tool results, audit memory writes). This is the gap bawbel-scanner v1.1+ will address with runtime analysis.</p>
+      <p>Several records are at the <code>runtime</code> layer — RAG injection, tool result manipulation, memory poisoning, A2A injection, context flooding, vision injection, REPL code mode, and async task poisoning. A static scanner cannot catch these because the malicious payload only exists during a live session. They require either a behavioral sandbox (run the agent and observe) or runtime monitoring (proxy tool results, audit memory writes). No implementation covers this layer completely today; it is the hardest layer by design.</p>
     </div>
 
     <h2>How a record works</h2>
@@ -293,8 +293,8 @@ and a detailed view for developers and security engineers implementing the stand
         <!-- validation row -->
         <text class="t-tiny" x="40" y="232" style="font-weight:600;">VALIDATION</text>
         <rect class="b-gray d-box" x="40" y="242" width="230" height="56" rx="10"/>
-        <text class="t-title" x="62" y="266">Rule</text>
-        <text class="t-sub" x="62" y="286">pattern / yara / semgrep</text>
+        <text class="t-title" x="62" y="266">Detection logic</text>
+        <text class="t-sub" x="62" y="286">any implementation's own, not shipped here</text>
         <rect class="b-gray d-box" x="345" y="242" width="245" height="56" rx="10"/>
         <text class="t-title" x="367" y="266">Positive fixture</text>
         <text class="t-sub" x="367" y="286">must trigger</text>
@@ -329,9 +329,9 @@ and a detailed view for developers and security engineers implementing the stand
         <text class="t-sub" x="62" y="618">ave_id in ruleId + taxonomies</text>
         <text class="t-sub" x="62" y="634">→ GitHub Security tab / CI</text>
         <rect class="b-purple d-box" x="470" y="572" width="410" height="68" rx="10"/>
-        <text class="t-title" x="492" y="598">Record set → PiranhaDB</text>
-        <text class="t-sub" x="492" y="618">→ api.piranha.bawbel.io</text>
-        <text class="t-sub" x="492" y="634">→ ave.bawbel.io</text>
+        <text class="t-title" x="492" y="598">Record set → any implementation</text>
+        <text class="t-sub" x="492" y="618">records/*.json, consumed directly</text>
+        <text class="t-sub" x="492" y="634">→ aveproject.org registry</text>
         <rect class="b-teal d-box" x="40" y="652" width="840" height="56" rx="10"/>
         <text class="t-title" x="62" y="676">Crosswalks</text>
         <text class="t-sub" x="62" y="696">SkillSpector and ClawScan finding types map to AVE ids — one vocabulary across scanners</text>
@@ -344,8 +344,8 @@ and a detailed view for developers and security engineers implementing the stand
     <h3>Anatomy</h3>
     <p>A record has two halves. The <b>static definition</b> describes the vulnerability class and never changes per scan: <code>ave_id</code> (immutable), <code>attack_class</code>, <code>behavioral_fingerprint</code>, <code>severity</code>, <code>aivss</code>, and the framework mappings. The <b>evidence declarations</b> (added in v1.1) are optional and declare the defaults a scanner uses to assign per-finding metadata.</p>
 
-    <h3>Validation &mdash; the record/rule/fixture triangle</h3>
-    <p>Every record requires a detection <b>rule</b> (pattern, YARA, or Semgrep) that references the <code>ave_id</code>, a <b>positive fixture</b> that must trigger it, and a <b>negative fixture</b> &mdash; a benign lookalike that must not. A rule without a negative fixture is an incomplete false-positive guard.</p>
+    <h3>Validation &mdash; the record and conformance fixture relationship</h3>
+    <p>Every record should have a <b>positive fixture</b> that any conforming implementation must flag, and a <b>negative fixture</b> &mdash; a benign lookalike it must not. The detection logic that decides pass or fail belongs to each implementation, not to this repo; a record with no fixtures gives implementers no shared, neutral way to verify they agree.</p>
 
     <h3>Consumption &mdash; the record declares, the scanner assigns</h3>
     <p>This is the most important rule for implementers. A record is static; a finding is a runtime instance. Confidence belongs to the finding, never the record &mdash; the same class in a docs folder and in a live skill file deserves different confidence. So the record declares a <code>confidence_baseline</code> and the scanner does the per-detection math.</p>
