@@ -34,6 +34,8 @@
   a { color: var(--brand); }
   .wrap { max-width: 1240px; margin: 0 auto; padding: 0 28px; }
 
+  #dynamic-crosswalks .wrap { padding: 0 0px !important;  }
+
   /* ---------- top bar ---------- */
   .topbar { background: var(--deep); color: #eaf3ee; }
   .topbar .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; }
