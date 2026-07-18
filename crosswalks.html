@@ -338,11 +338,12 @@ window.RECORDS.forEach(r=>{
   if(!r.severity && r.aivss && r.aivss.aivss_severity) r.severity=r.aivss.aivss_severity;
   if(!r.aivss_score && r.aivss) r.aivss_score=r.aivss.aivss_score;
   if(!r.detection_layer) r.detection_layer='content';
+  if(!r.owasp_mcp && r.aivss && r.aivss.owasp_mcp_mapping) r.owasp_mcp=r.aivss.owasp_mcp_mapping;
 });
 window.RECORDS.slice().sort((a,b)=>a.ave_id<b.ave_id?-1:1).forEach(r=>{
   const tr=document.createElement('tr');
-  const j=a=>(a&&a.length)?a.join(', '):'\u2014';
-  tr.innerHTML=`<td><span class="aveid">${r.ave_id}</span></td><td class="mono">${r.attack_class}</td><td class="mono">${j(r.owasp_mcp)}</td><td class="mono">${j(r.owasp_asi)}</td><td class="mono">${j(r.mitre_atlas)}</td>`;
+  const j=a=>(a&&a.length)?a.join(', '):'—';
+  tr.innerHTML=`<td><span class="aveid">${r.ave_id}</span></td><td class="mono">${r.attack_class}</td><td class="mono">${j(r.owasp_mcp)}</td><td class="mono">${j(r.owasp_mapping)}</td><td class="mono">${j(r.mitre_atlas_mapping)}</td>`;
   tb.appendChild(tr);
 });
 </script>

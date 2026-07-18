@@ -196,24 +196,27 @@ and detection layer; click any row for full detail, AIVSS scoring, and provenanc
 <script>
 const RECORDS = window.RECORDS;
 
-// Normalise records against the current v1.1.0 field names. owasp_mapping
-// and mitre_atlas_mapping were renamed to owasp_asi and mitre_atlas; the
-// nested aivss.owasp_mcp_mapping duplicate was removed entirely, both as
-// part of the v1.1.0 migration. This block exists only to bridge any
-// pre-migration record that might still be cached somewhere; every current
-// record already carries the new names directly and needs no bridging.
+// Normalise records that use the old 0.2.0 shape where severity lives at
+// aivss.aivss_severity instead of the top-level severity field.
 RECORDS.forEach(r => {
   if (!r.severity && r.aivss && r.aivss.aivss_severity) {
     r.severity = r.aivss.aivss_severity;
   }
+  // Normalise aivss_score shortcut
   if (!r.aivss_score && r.aivss && r.aivss.aivss_score) {
     r.aivss_score = r.aivss.aivss_score;
   }
+  // Normalise detection_layer — old records may not have it
   if (!r.detection_layer) r.detection_layer = 'content';
+  // Normalise attack_class from old "Category - Subcategory" format
+  // keep as-is but ensure it exists
   if (!r.attack_class && r.attack_class !== '') r.attack_class = '';
-  // No owasp_mcp bridge: owasp_mcp_mapping no longer exists anywhere,
-  // including inside aivss. A record missing owasp_mcp is a data problem
-  // to fix at the source, not something this page should paper over.
+  // Normalise owasp_mcp for crosswalk page
+  if (!r.owasp_mcp && r.aivss && r.aivss.owasp_mcp_mapping) {
+    r.owasp_mcp = r.aivss.owasp_mcp_mapping;
+  }
+  // owasp_mapping -> old records use owasp_mapping directly already
+  // mitre_atlas_mapping -> old records use mitre_atlas_mapping directly
 });
 
 // ============ AVE RECORDS (build-time generated from records/*.json) ============
@@ -335,8 +338,8 @@ function openDrawer(r){
         <div class="panel">
           <h4>Framework mappings</h4>
           <div style="margin-bottom:10px"><div style="font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-bottom:6px">OWASP MCP TOP 10</div><div class="chips">${chip(r.owasp_mcp,'mcp')}</div></div>
-          <div style="margin-bottom:10px"><div style="font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-bottom:6px">MITRE ATLAS</div><div class="chips">${chip(r.mitre_atlas,'atlas')}</div></div>
-          <div><div style="font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-bottom:6px">OWASP AGENTIC SECURITY INITIATIVE TOP 10</div><div class="chips">${chip(r.owasp_asi)}</div></div>
+          <div style="margin-bottom:10px"><div style="font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-bottom:6px">MITRE ATLAS</div><div class="chips">${chip(r.mitre_atlas_mapping,'atlas')}</div></div>
+          <div><div style="font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-bottom:6px">OWASP AGENTIC TOP 10</div><div class="chips">${chip(r.owasp_mapping)}</div></div>
         </div>
       </div>
     </div>
