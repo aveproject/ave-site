@@ -47,13 +47,13 @@
 {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  "name": "AVE — Agentic Vulnerability Enumeration",
+  "name": "AVE: Agentic Vulnerability Enumeration",
   "url": "https://aveproject.org",
   "description": "The behavioral classification standard for agentic AI components.",
   "publisher": {
     "@type": "Organization",
-    "name": "Bawbel",
-    "url": "https://bawbel.io",
+    "name": "AVE Project",
+    "url": "https://aveproject.org",
     "logo": {
       "@type": "ImageObject",
       "url": "https://aveproject.org/ave-favicon-512.png",
@@ -405,6 +405,13 @@ $('#overlay').addEventListener('click', closeDrawer);
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeDrawer(); });
 const docLabels={schema:'Schema v1.0.0 reference',architecture:'AVE architecture (implementer guide)',crosswalk:'crosswalk tables',adopt:'\'Adopt AVE in your tool\' guide'};
 document.querySelectorAll('[data-doc]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault(); alert('Opens the '+(docLabels[a.dataset.doc]||a.dataset.doc)+' in the full site build.');}));
+
+// pre-fill search from the SearchAction's ?q= query param
+(function(){
+  const params = new URLSearchParams(location.search);
+  const q = params.get('q');
+  if(q){ $('#q').value = q; }
+})();
 
 if (typeof window.RECORDS === 'undefined' || !window.RECORDS || window.RECORDS.length === 0) {
   document.getElementById('noresult').style.display = 'block';
