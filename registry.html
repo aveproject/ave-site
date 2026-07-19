@@ -165,7 +165,7 @@ and detection layer; click any row for full detail, AIVSS scoring, and provenanc
   <div class="wrap">
     <div class="cols">
       <div class="lic">
-        <p><b>AVE is an open standard.</b> The schema and records are published under Apache 2.0. AVE is moving toward neutral governance under an independent standards body &mdash; it is meant to outlive any single implementation, including Bawbel's.</p>
+        <p><b>AVE is an open standard.</b> The schema and records are published under Apache 2.0. AVE is moving toward neutral governance under an independent standards body, meant to outlive any single implementation, including Bawbel's.</p>
         <p>Maps to OWASP MCP Top 10 &middot; OWASP Agentic AI Top 10 &middot; MITRE ATLAS &middot; OWASP AIVSS v0.8. The open record set can be consumed by any tool.</p>
         <p class="citing"><b>Citing AVE.</b> Reference a record by its id, which is permanent and never reused: <span class="cmono">AVE-YYYY-NNNNN: Title. Agentic Vulnerability Enumeration (AVE), Bawbel/AVE Project. https://aveproject.org/registry.html#AVE-YYYY-NNNNN</span></p>
       </div>
@@ -310,7 +310,7 @@ function openDrawer(r){
     : '<p style="color:var(--ink-3);font-family:var(--mono);font-size:13px;">Does not chain into a known toxic flow.</p>';
   $('#d-body').innerHTML = `
     <div class="prov">
-      <h3>Provenance — where this record comes from</h3>
+      <h3>Provenance: where this record comes from</h3>
       <ul>${provHtml}</ul>
     </div>
 
@@ -341,7 +341,7 @@ function openDrawer(r){
       </div>
     </div>
 
-    <div class="block"><h3>Capability chain — derivable into</h3>${chain}</div>
+    <div class="block"><h3>Capability chain: derivable into</h3>${chain}</div>
 
     <div class="block"><h3>Indicators of compromise</h3>
       <ul class="ioc">${r.indicators_of_compromise.map(i=>`<li>${i}</li>`).join('')}</ul>
