@@ -110,14 +110,14 @@
   <div class="wrap">
     <span class="pill">Scoring · OWASP AIVSS v0.8</span>
     <h1>Scoring</h1>
-    <p>How AVE scores every behavioral classification record &mdash; the AIVSS v0.8 formula,
+    <p>How AVE scores every behavioral classification record: the AIVSS v0.8 formula,
 the 10 AARF amplification factors, and worked examples from real records.</p>
   </div>
 </header>
 
 <article class="doc">
   <div class="wrap">
-    <p class="lead">AVE does not invent its own scoring system. Every record is scored using <a href="https://aivss.owasp.org" target="_blank">OWASP AIVSS v0.8</a> &mdash; the AI Vulnerability Severity Scoring standard. AVE implements AIVSS; it does not own or modify it. This page documents how that scoring works inside an AVE record, so a researcher writing a new record or a reviewer checking an existing one can verify the number is right.</p>
+    <p class="lead">AVE does not invent its own scoring system. Every record is scored using <a href="https://aivss.owasp.org" target="_blank">OWASP AIVSS v0.8</a>, the AI Vulnerability Severity Scoring standard. AVE implements AIVSS; it does not own or modify it. This page documents how that scoring works inside an AVE record, so a researcher writing a new record or a reviewer checking an existing one can verify the number is right.</p>
 
     <h2>The formula</h2>
     <div class="codeblock"><span class="g">AIVSS</span> = ((<span class="g">CVSS_Base</span> + <span class="g">AARS</span>) / 2) &times; <span class="g">ThM</span> &times; <span class="g">Mitigation_Factor</span></div>
@@ -128,18 +128,18 @@ the 10 AARF amplification factors, and worked examples from real records.</p>
       <thead><tr><th>Term</th><th>Range</th><th>What it is</th></tr></thead>
       <tbody>
         <tr><td class="mono">CVSS_Base</td><td class="mono">0&ndash;10</td><td>Standard CVSS 4.0 base score for the underlying flaw, independent of agentic context. Stored as <code>aivss.cvss_base</code>.</td></tr>
-        <tr><td class="mono">AARS</td><td class="mono">0&ndash;10</td><td>Agentic Amplification &amp; Reachability Score &mdash; the sum of the 10 AARF factors below. Stored as <code>aivss.aars</code>.</td></tr>
-        <tr><td class="mono">ThM</td><td class="mono">0.5&ndash;1.5</td><td>Threat &amp; Heuristic Multiplier &mdash; how real-world the threat is. Stored as <code>aivss.thm</code>.</td></tr>
+        <tr><td class="mono">AARS</td><td class="mono">0&ndash;10</td><td>Agentic Amplification &amp; Reachability Score: the sum of the 10 AARF factors below. Stored as <code>aivss.aars</code>.</td></tr>
+        <tr><td class="mono">ThM</td><td class="mono">0.5&ndash;1.5</td><td>Threat &amp; Heuristic Multiplier: how real-world the threat is. Stored as <code>aivss.thm</code>.</td></tr>
         <tr><td class="mono">Mitigation_Factor</td><td class="mono">0&ndash;1</td><td>How much available mitigation reduces real-world risk. Stored as <code>aivss.mitigation_factor</code>.</td></tr>
       </tbody>
     </table></div>
 
     <div class="callout">
       <span class="k">Why average CVSS and AARS, not just use AARS</span>
-      <p>AIVSS does not replace CVSS &mdash; it extends it. Averaging CVSS_Base with AARS means a class with a low traditional severity but high agentic amplification (or the reverse) lands in the middle rather than at either extreme. A record is never scored purely on how &ldquo;agentic&rdquo; it is.</p>
+      <p>AIVSS does not replace CVSS: it extends it. Averaging CVSS_Base with AARS means a class with a low traditional severity but high agentic amplification (or the reverse) lands in the middle rather than at either extreme. A record is never scored purely on how &ldquo;agentic&rdquo; it is.</p>
     </div>
 
-    <h2>AARS &mdash; the 10 AARF factors</h2>
+    <h2>AARS: the 10 AARF factors</h2>
     <p>AARS is the sum of 10 Agentic Amplification and Risk Factors (AARF), each scored 0.0 (not applicable) to 1.0 (fully applicable). They live in <code>aivss.aarf</code> as an optional breakdown object.</p>
 
     <div class="tbl-wrap"><table class="ref">
@@ -158,15 +158,15 @@ the 10 AARF amplification factors, and worked examples from real records.</p>
       </tbody>
     </table></div>
 
-    <p>Intermediate values (0.5) are used when a factor partially applies. AARS is simply the sum of all 10 &mdash; a record where every factor scores 1.0 has an AARS of 10.</p>
+    <p>Intermediate values (0.5) are used when a factor partially applies. AARS is simply the sum of all 10: a record where every factor scores 1.0 has an AARS of 10.</p>
 
-    <h2>ThM &mdash; Threat &amp; Heuristic Multiplier</h2>
+    <h2>ThM: Threat &amp; Heuristic Multiplier</h2>
     <p>ThM reflects how real the threat is right now, independent of severity. It is set by the researcher authoring the record, based on observed evidence.</p>
 
     <div class="tbl-wrap"><table class="ref">
       <thead><tr><th>ThM</th><th>When to use it</th></tr></thead>
       <tbody>
-        <tr><td class="mono">0.75</td><td>Theoretical &mdash; no known proof of concept</td></tr>
+        <tr><td class="mono">0.75</td><td>Theoretical: no known proof of concept</td></tr>
         <tr><td class="mono">0.90</td><td>A working proof of concept exists</td></tr>
         <tr><td class="mono">1.0</td><td>Exploited in the wild, or weaponised</td></tr>
       </tbody>
@@ -185,7 +185,7 @@ the 10 AARF amplification factors, and worked examples from real records.</p>
       </tbody>
     </table></div>
 
-    <h2>Worked example &mdash; AVE-2026-00046</h2>
+    <h2>Worked example: AVE-2026-00046</h2>
     <p>AVE's only CRITICAL-severity record: <em>MCP tool hook hijacking</em>. Here is its real <code>aivss</code> object and how the final score was derived.</p>
 
     <figure>
@@ -206,11 +206,11 @@ the 10 AARF amplification factors, and worked examples from real records.</p>
         <text class="t-title" x="62" y="316">Step 3 &mdash; compose</text>
         <text class="t-sub" x="62" y="336">((10.0 + 8.5) / 2) &times; 1.0 &times; 1.0 = 9.25 &rarr; rounds to <tspan fill="#b3261e" font-weight="700">9.2 &middot; CRITICAL</tspan></text>
       </svg>
-      <figcaption>AVE-2026-00046 &mdash; MCP tool hook hijacking. Real values from the published record.</figcaption>
+      <figcaption>AVE-2026-00046: MCP tool hook hijacking. Real values from the published record.</figcaption>
     </figure>
 
-    <h2>Worked example &mdash; AVE-2026-00014</h2>
-    <p>The lowest-severity record in the set: <em>false authority claim via trust escalation</em>. A useful contrast &mdash; high CVSS_Base alone does not guarantee a high final score.</p>
+    <h2>Worked example: AVE-2026-00014</h2>
+    <p>The lowest-severity record in the set: <em>false authority claim via trust escalation</em>. A useful contrast: high CVSS_Base alone does not guarantee a high final score.</p>
 
     <figure>
       <svg viewBox="0 0 920 360" role="img" aria-label="AIVSS calculation for AVE-2026-00014" fill="#11201a">
@@ -230,7 +230,7 @@ the 10 AARF amplification factors, and worked examples from real records.</p>
         <text class="t-title" x="62" y="316">Step 3 &mdash; compose</text>
         <text class="t-sub" x="62" y="336">((6.5 + 5.5) / 2) &times; 0.75 &times; 0.83 = 3.73 &rarr; rounds to <tspan fill="#5d6f66" font-weight="700">3.7 &middot; LOW</tspan></text>
       </svg>
-      <figcaption>AVE-2026-00014 &mdash; false authority claim via trust escalation. ThM 0.75 (theoretical, no PoC) and a Mitigation_Factor below 1.0 both pull the score down despite meaningful CVSS_Base and AARS.</figcaption>
+      <figcaption>AVE-2026-00014: false authority claim via trust escalation. ThM 0.75 (theoretical, no PoC) and a Mitigation_Factor below 1.0 both pull the score down despite meaningful CVSS_Base and AARS.</figcaption>
     </figure>
 
     <div class="callout gold">
@@ -239,7 +239,7 @@ the 10 AARF amplification factors, and worked examples from real records.</p>
     </div>
 
     <h2>Where this lives in a record</h2>
-    <p>Field-level reference for every part of the <code>aivss</code> object &mdash; required/optional status and types &mdash; is on the <a href="schema.html">Schema</a> page. This page explains how the numbers are derived; Schema documents the field shapes that hold them.</p>
+    <p>Field-level reference for every part of the <code>aivss</code> object (required/optional status and types) is on the <a href="schema.html">Schema</a> page. This page explains how the numbers are derived; Schema documents the field shapes that hold them.</p>
 
     <p style="margin-top:20px;">OWASP AIVSS v0.8 specification: <a href="https://aivss.owasp.org" target="_blank">aivss.owasp.org</a></p>
   </div>
@@ -249,7 +249,7 @@ the 10 AARF amplification factors, and worked examples from real records.</p>
   <div class="wrap">
     <div class="cols">
       <div class="lic">
-        <p><b>AVE is an open standard.</b> The schema and records are published under Apache 2.0. AVE is moving toward neutral governance under an independent standards body &mdash; it is meant to outlive any single implementation, including Bawbel's.</p>
+        <p><b>AVE is an open standard.</b> The schema and records are published under Apache 2.0. AVE is moving toward neutral governance under an independent standards body, meant to outlive any single implementation, including Bawbel's.</p>
         <p>Maps to OWASP MCP Top 10 &middot; OWASP Agentic AI Top 10 &middot; MITRE ATLAS &middot; OWASP AIVSS v0.8. The open record set can be consumed by any tool.</p>
         <p class="citing"><b>Citing AVE.</b> Reference a record by its id, which is permanent and never reused: <span class="cmono">AVE-YYYY-NNNNN: Title. Agentic Vulnerability Enumeration (AVE), Bawbel/AVE Project. https://aveproject.org/registry.html#AVE-YYYY-NNNNN</span></p>
       </div>
