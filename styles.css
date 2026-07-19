@@ -296,6 +296,13 @@ table.ref tbody tr:hover { background: #f7f9f7; }
 .codeblock { font-family: var(--mono); font-size: 13px; background: var(--deep); color: #d7ece1; border-radius: 12px; padding: 18px 20px; overflow-x: auto; line-height: 1.6; margin: 18px 0; white-space: pre; }
 .codeblock .c { color: #9ec3b2; }
 .codeblock .g { color: var(--gold); }
+.codeblock-wrap { position: relative; }
+.codeblock-wrap .copy-btn { position: absolute; top: 10px; right: 10px; display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; color: #9ec3b2; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); border-radius: 7px; cursor: pointer; padding: 0; }
+.codeblock-wrap .copy-btn:hover { background: rgba(255,255,255,0.14); color: #d7ece1; }
+.codeblock-wrap .copy-btn .i-check { display: none; }
+.codeblock-wrap .copy-btn.done { color: var(--gold); border-color: var(--gold); background: rgba(212,160,23,0.14); }
+.codeblock-wrap .copy-btn.done .i-copy { display: none; }
+.codeblock-wrap .copy-btn.done .i-check { display: block; }
 
 /* ============ responsive improvements ============ */
 
