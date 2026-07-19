@@ -110,7 +110,7 @@
   <div class="wrap">
     <span class="pill">Architecture · implementer guide</span>
     <h1>Architecture</h1>
-    <p>The structure of the standard itself &mdash; what any tool must honor to implement AVE correctly and stay consistent with every other implementation.</p>
+    <p>The structure of the standard itself: what any tool must honor to implement AVE correctly and stay consistent with every other implementation.</p>
   </div>
 </header>
 
@@ -187,7 +187,7 @@ and a detailed view for developers and security engineers implementing the stand
       <figcaption>Problem → standard → why it wins → the prize</figcaption>
     </figure>
 
-    <p>Conventional standards stop at the package: CVE identifies a flaw, OSV maps it to a version range. Agent component threats have no package and no version &mdash; the danger is behavioral. AVE assigns a stable id to each distinct behavioral vulnerability class, scores it with OWASP AIVSS v0.8, and maps it to the frameworks the field already uses. One record catches many textual variants of the same underlying attack.</p>
+    <p>Conventional standards stop at the package: CVE identifies a flaw, OSV maps it to a version range. Agent component threats have no package and no version; the danger is behavioral. AVE assigns a stable id to each distinct behavioral vulnerability class, scores it with OWASP AIVSS v0.8, and maps it to the frameworks the field already uses. One record catches many textual variants of the same underlying attack.</p>
 
     <div class="callout gold">
       <span class="k">Why this matters for implementers</span>
@@ -196,7 +196,7 @@ and a detailed view for developers and security engineers implementing the stand
 
     <h2>The five detection layers</h2>
 
-    <p>Every AVE record declares a <code>detection_layer</code> — where in the agent ecosystem the vulnerability class surfaces. This determines what kind of scanner or monitoring can detect it. Two scanners that implement the same AVE record correctly will agree on the layer; this is part of the implementer contract.</p>
+    <p>Every AVE record declares a <code>detection_layer</code>: where in the agent ecosystem the vulnerability class surfaces. This determines what kind of scanner or monitoring can detect it. Two scanners that implement the same AVE record correctly will agree on the layer; this is part of the implementer contract.</p>
 
     <div class="tbl-wrap" style="margin:20px 0;">
       <table class="ref" id="layers-table">
@@ -232,7 +232,7 @@ and a detailed view for developers and security engineers implementing the stand
               <span style="display:inline-block;background:var(--low-bg);border:1.5px solid var(--mid);border-radius:8px;padding:4px 10px;font-family:var(--mono);font-size:13px;font-weight:600">registry_<br>metadata</span>
               <div style="font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-top:4px">static_detection</div>
             </td>
-            <td>Registry listing — server name, publisher, description on smithery.ai or the official MCP registry</td>
+            <td>Registry listing: server name, publisher, description on smithery.ai or the official MCP registry</td>
             <td>Registry audit before install</td>
             <td style="text-align:center;font-size:20px;font-weight:700"><span data-layer-count="registry_metadata">—</span><span style="font-size:12px;font-weight:400;color:var(--ink-3)"> / <span data-layer-total></span></span></td>
           </tr>
@@ -260,7 +260,7 @@ and a detailed view for developers and security engineers implementing the stand
     <div class="callout">
 
       <span class="k">Why runtime records are the hardest to defend</span>
-      <p>Several records are at the <code>runtime</code> layer — RAG injection, tool result manipulation, memory poisoning, A2A injection, context flooding, vision injection, REPL code mode, and async task poisoning. A static scanner cannot catch these because the malicious payload only exists during a live session. They require either a behavioral sandbox (run the agent and observe) or runtime monitoring (proxy tool results, audit memory writes). No implementation covers this layer completely today; it is the hardest layer by design.</p>
+      <p>Several records are at the <code>runtime</code> layer: RAG injection, tool result manipulation, memory poisoning, A2A injection, context flooding, vision injection, REPL code mode, and async task poisoning. A static scanner cannot catch these because the malicious payload only exists during a live session. They require either a behavioral sandbox (run the agent and observe) or runtime monitoring (proxy tool results, audit memory writes). No implementation covers this layer completely today; it is the hardest layer by design.</p>
     </div>
 
     <h2>How a record works</h2>
@@ -344,11 +344,11 @@ and a detailed view for developers and security engineers implementing the stand
     <h3>Anatomy</h3>
     <p>A record has two halves. The <b>static definition</b> describes the vulnerability class and never changes per scan: <code>ave_id</code> (immutable), <code>attack_class</code>, <code>behavioral_fingerprint</code>, <code>severity</code>, <code>aivss</code>, and the framework mappings. The <b>evidence declarations</b> (added in v1.1) are optional and declare the defaults a scanner uses to assign per-finding metadata.</p>
 
-    <h3>Validation &mdash; the record and conformance fixture relationship</h3>
-    <p>Every record should have a <b>positive fixture</b> that any conforming implementation must flag, and a <b>negative fixture</b> &mdash; a benign lookalike it must not. The detection logic that decides pass or fail belongs to each implementation, not to this repo; a record with no fixtures gives implementers no shared, neutral way to verify they agree.</p>
+    <h3>Validation: the record and conformance fixture relationship</h3>
+    <p>Every record should have a <b>positive fixture</b> that any conforming implementation must flag, and a <b>negative fixture</b>: a benign lookalike it must not. The detection logic that decides pass or fail belongs to each implementation, not to this repo; a record with no fixtures gives implementers no shared, neutral way to verify they agree.</p>
 
-    <h3>Consumption &mdash; the record declares, the scanner assigns</h3>
-    <p>This is the most important rule for implementers. A record is static; a finding is a runtime instance. Confidence belongs to the finding, never the record &mdash; the same class in a docs folder and in a live skill file deserves different confidence. So the record declares a <code>confidence_baseline</code> and the scanner does the per-detection math.</p>
+    <h3>Consumption: the record declares, the scanner assigns</h3>
+    <p>This is the most important rule for implementers. A record is static; a finding is a runtime instance. Confidence belongs to the finding, never the record: the same class in a docs folder and in a live skill file deserves different confidence. So the record declares a <code>confidence_baseline</code> and the scanner does the per-detection math.</p>
 
     <div class="tbl-wrap"><table class="ref">
       <thead><tr><th>Record declares (static)</th><th>Scanner assigns to finding (runtime)</th></tr></thead>
@@ -366,7 +366,7 @@ and a detailed view for developers and security engineers implementing the stand
       <p>In any finding, <code>confidence</code> and <code>aivss_score</code> are separate fields and are never merged. AIVSS answers &ldquo;how bad would this be&rdquo;; confidence answers &ldquo;how sure are we.&rdquo; Putting baselines in the standard rather than in scanner code is what keeps two implementations consistent.</p>
     </div>
 
-    <h2>Output &mdash; how AVE travels</h2>
+    <h2>Output: how AVE travels</h2>
     <p>A scanner emits findings as <b>SARIF</b> with the <code>ave_id</code> in <code>ruleId</code> and under <code>taxonomies</code>, plus <code>aivss_score</code>, <code>confidence</code>, <code>owasp_mcp</code>, and <code>mitre_atlas</code> in the properties bag. Because SARIF is already consumed by the GitHub Security tab and CI, AVE ids reach those surfaces for free. The open record set can be consumed by any tool, and <a href="crosswalks.html">crosswalks</a> let other scanners&rsquo; finding types resolve to AVE ids.</p>
 
     <div class="callout gold">
@@ -379,7 +379,7 @@ and a detailed view for developers and security engineers implementing the stand
   <div class="wrap">
     <div class="cols">
       <div class="lic">
-        <p><b>AVE is an open standard.</b> The schema and records are published under Apache 2.0. AVE is moving toward neutral governance under an independent standards body &mdash; it is meant to outlive any single implementation, including Bawbel's.</p>
+        <p><b>AVE is an open standard.</b> The schema and records are published under Apache 2.0. AVE is moving toward neutral governance under an independent standards body, meant to outlive any single implementation, including Bawbel's.</p>
         <p>Maps to OWASP MCP Top 10 &middot; OWASP Agentic AI Top 10 &middot; MITRE ATLAS &middot; OWASP AIVSS v0.8. The open record set can be consumed by any tool.</p>
         <p class="citing"><b>Citing AVE.</b> Reference a record by its id, which is permanent and never reused: <span class="cmono">AVE-YYYY-NNNNN: Title. Agentic Vulnerability Enumeration (AVE), Bawbel/AVE Project. https://aveproject.org/registry.html#AVE-YYYY-NNNNN</span></p>
       </div>
