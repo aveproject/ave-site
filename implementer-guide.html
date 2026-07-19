@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Implementer Guide — AVE Behavioral Classification Standard</title>
+<meta name="description" content="How to add ave_id to your scanner's finding output: three integration patterns for runtime API lookup, bundled offline records, and ID-only emission, plus SARIF conventions and crosswalk mapping.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0a3024">
+<link rel="canonical" href="https://aveproject.org/implementer-guide.html">
+
+<!-- Open Graph / social sharing -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://aveproject.org/implementer-guide.html">
+<meta property="og:title" content="Implementer Guide — AVE Behavioral Classification Standard">
+<meta property="og:description" content="How to add ave_id to your scanner's finding output: three integration patterns for runtime API lookup, bundled offline records, and ID-only emission, plus SARIF conventions and crosswalk mapping.">
+<meta property="og:image" content="https://aveproject.org/ave-favicon-512.png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:site_name" content="AVE — Agentic Vulnerability Enumeration">
+
+<!-- Twitter card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@bawbel_io">
+<meta name="twitter:title" content="Implementer Guide — AVE Behavioral Classification Standard">
+<meta name="twitter:description" content="How to add ave_id to your scanner's finding output: three integration patterns for runtime API lookup, bundled offline records, and ID-only emission, plus SARIF conventions and crosswalk mapping.">
+<meta name="twitter:image" content="https://aveproject.org/ave-favicon-512.png">
+
+<!-- Favicons -->
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/ave-favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KV0S12VEF3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-KV0S12VEF3');
+</script>
+
+<!-- Structured data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "AVE — Agentic Vulnerability Enumeration",
+  "url": "https://aveproject.org",
+  "description": "The behavioral classification standard for agentic AI components.",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Bawbel",
+    "url": "https://bawbel.io",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://aveproject.org/ave-favicon-512.png",
+      "width": 512,
+      "height": 512
+    }
+  },
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://aveproject.org/registry.html?q={{search_term_string}}"
+    },
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="wrap">
+    <a class="brandmark" href="index.html">
+      <svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true">
+        <path d="M20 6 C28 6 36 13 38 22 C30 20 24 22 20 27 C16 22 10 20 2 22 C4 13 12 6 20 6 Z" fill="#d4a017"/>
+        <path d="M20 27 L20 36 M20 27 C18 30 16 32 14 33 M20 27 C22 30 24 32 26 33" stroke="#9ec3b2" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        <circle cx="14.5" cy="17" r="1.6" fill="#0a3024"/><circle cx="25.5" cy="17" r="1.6" fill="#0a3024"/>
+      </svg>
+      <span>
+        <span class="wm">A<b>V</b>E</span>
+        <span class="sub">Agentic Vulnerability Enumeration</span>
+      </span>
+    </a>
+    <input type="checkbox" id="nav-toggle" class="nav-toggle">
+    <label for="nav-toggle" class="nav-toggle-label" aria-label="Toggle navigation">
+      <svg class="icon-open" viewBox="0 0 24 24" fill="none" stroke="#eaf3ee" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <svg class="icon-close" viewBox="0 0 24 24" fill="none" stroke="#eaf3ee" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
+    </label>
+    <nav class="topnav">
+      <a href="registry.html">Registry</a>
+      <a href="crosswalks.html">Crosswalks</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="scoring.html">Scoring</a>
+      <a href="schema.html">Schema</a>
+      <a class="gh" href="https://github.com/aveproject/ave" target="_blank">GitHub</a>
+    </nav>
+  </div>
+</div>
+<header class="pagehead">
+  <div class="wrap">
+    <span class="pill">Implementer Guide</span>
+    <h1>Adding AVE IDs to your scanner</h1>
+    <p>AVE assigns stable behavioral classification IDs to agentic AI component
+flaws. Adding an <code>ave_id</code> field to your scanner's finding output
+lets security teams deduplicate findings across tools, link to full
+behavioral fingerprints and IOCs, and report against a shared vocabulary.
+This guide covers three consumption patterns depending on your environment.</p>
+  </div>
+</header>
+<article class="doc"><div class="wrap">
+
+  <h2>Which pattern to use</h2>
+  <div class="tbl-wrap"><table class="ref"><thead><tr><th>Your environment</th><th>Recommended pattern</th></tr></thead><tbody>
+  <tr><td>Cloud CI/CD, always-on internet</td><td>Pattern 1: Runtime API</td></tr>
+  <tr><td>Mixed or uncertain</td><td>Pattern 2: Bundled offline</td></tr>
+  <tr><td>Air-gapped or regulated (banking, defense, healthcare)</td><td>Pattern 2: Bundled offline or Pattern 3: ID-only</td></tr>
+  <tr><td>Enterprise SIEM resolves references downstream</td><td>Pattern 3: ID-only</td></tr>
+  </tbody></table></div>
+
+  <h2>Pattern 1: Runtime API lookup</h2>
+  <p>Scanner emits <code>ave_id</code> in its finding output and optionally
+  calls the AVE reference API at scan time to enrich with the full record.</p>
+  <p><strong>API endpoint:</strong> <code>GET https://api.aveproject.org/records/{ave_id}</code></p>
+  <p>Returns: full record JSON including <code>behavioral_fingerprint</code>,
+  <code>indicators_of_compromise</code>, <code>remediation</code>,
+  <code>owasp_mcp</code>, <code>mitre_atlas</code>, <code>aivss</code>.</p>
+
+  <div class="codeblock">import httpx
+
+def enrich_finding(ave_id: str) -&gt; dict:
+    resp = httpx.get(f"https://api.aveproject.org/records/{ave_id}", timeout=5)
+    resp.raise_for_status()
+    return resp.json()
+
+finding = {
+    "rule_id": "your-rule-id",
+    "ave_id": "AVE-2026-00002",
+    "severity": "HIGH",
+    # optional: enrich at scan time
+    "ave_record": enrich_finding("AVE-2026-00002"),
+}</div>
+
+  <p><strong>When to use:</strong> developer machines, cloud CI/CD
+  pipelines, SaaS tools with outbound internet.<br>
+  <strong>When not to use:</strong> air-gapped environments, regulated
+  environments where outbound calls to third-party APIs are blocked.</p>
+
+  <h2>Pattern 2: Bundled offline record set</h2>
+  <p>Download the full AVE record set at build/install time. Bundle it
+  with your scanner. At scan time, look up records locally.</p>
+  <p><strong>Offline artifact, always current, no release tag required:</strong><br>
+  <code>https://raw.githubusercontent.com/aveproject/ave/main/dist/ave-records-latest.json</code></p>
+  <p>Regenerated automatically on every <code>records/</code> change on
+  <code>develop</code>; see <code>scripts/build-records.js</code>. A
+  companion manifest at <code>dist/ave-records-latest.manifest.json</code>
+  carries <code>schema_version</code>, <code>record_count</code>, and
+  <code>generated_at</code> for a cheap sanity check before parsing the
+  full array. A versioned, frozen snapshot is also committed at each
+  schema transition (<code>dist/ave-records-v1.1.0.json</code>, later
+  <code>dist/ave-records-v1.2.0.json</code>, and so on) for anyone who
+  deliberately wants to pin to one point in time rather than track
+  current; a <a href="https://github.com/aveproject/ave/releases">GitHub
+  Release</a> attaches the matching frozen file as a second distribution
+  point when one is cut, not the only one.</p>
+  <p>Format: JSON array of all active records (59 as of schema v1.1.0).</p>
+
+  <div class="codeblock">import json
+from pathlib import Path
+
+# Load at startup
+AVE_RECORDS = {
+    r["ave_id"]: r
+    for r in json.loads(Path("ave-records-latest.json").read_text())
+}
+
+def lookup_ave(ave_id: str) -&gt; dict | None:
+    return AVE_RECORDS.get(ave_id)</div>
+
+  <p><strong>Sync strategy:</strong> track <code>ave-records-latest.json</code>
+  if you always want current data, or pin to a specific
+  <code>ave-records-v&lt;version&gt;.json</code> snapshot if you want
+  stability, that file is frozen once written and never changes underneath
+  you. Either way, do not auto-update at runtime; re-fetch on your own
+  release cadence.</p>
+  <p><strong>When to use:</strong> air-gapped environments, regulated
+  environments, tools that cannot make outbound calls, offline-first
+  scanners.</p>
+
+  <h2>Pattern 3: ID-only emission</h2>
+  <p>Scanner emits <code>ave_id</code> in its finding output. No enrichment
+  at scan time. The consuming system (SIEM, dashboard, ticket system, SARIF
+  viewer) resolves the ID when connectivity is available.</p>
+  <p>This is the most air-gap-friendly pattern because the scanner itself
+  makes zero network calls related to AVE.</p>
+  <p><strong>Example SARIF output</strong> (the correct way to carry
+  <code>ave_id</code> in SARIF):</p>
+
+  <div class="codeblock">{
+  "runs": [{
+    "results": [{
+      "ruleId": "your-rule-id",
+      "properties": {
+        "ave_id": "AVE-2026-00002",
+        "ave_url": "https://aveproject.org/registry.html#AVE-2026-00002",
+        "ave_api": "https://api.aveproject.org/records/AVE-2026-00002"
+      }
+    }]
+  }]
+}</div>
+
+  <p>Full SARIF convention: <a href="https://github.com/aveproject/ave/blob/main/docs/specs/ave-in-sarif.md">docs/specs/ave-in-sarif.md</a></p>
+  <p><strong>When to use:</strong> any environment. Especially useful when
+  the scanner runs in a restricted environment but findings are reviewed
+  in a connected dashboard.</p>
+
+  <h2>The mapping step</h2>
+  <p>To emit AVE IDs, you need a mapping from your internal rule IDs to AVE
+  IDs. Two options:</p>
+  <p><strong>Option A: build your own mapping table.</strong> Use the
+  crosswalk files in this repo as reference:</p>
+  <ul>
+    <li><code>crosswalks/skillspector-to-ave.json</code>: maps NVIDIA
+    SkillSpector categories to AVE IDs.</li>
+    <li><code>crosswalks/clawscan-to-ave.json</code>: maps ClawScan rule
+    IDs to AVE IDs.</li>
+  </ul>
+  <p>These show the mapping format and rationale. Build an equivalent for
+  your own rule IDs.</p>
+  <p><strong>Option B: request a crosswalk.</strong> Open an issue in this
+  repo with your scanner's detection categories. The maintainer will help
+  map them to AVE IDs and publish the crosswalk.</p>
+
+  <h2>Minimum viable integration</h2>
+  <p>The smallest possible integration is adding one field:</p>
+
+  <div class="codeblock">finding = {
+    "rule_id": "prompt-injection/tool-description",
+    "severity": "HIGH",
+    "ave_id": "AVE-2026-00002",  # add this
+}</div>
+
+  <p>That is it. The ID is stable and permanent. No other changes required.
+  Your users get cross-tool deduplication and links to the full behavioral
+  record.</p>
+
+  <h2>Contact</h2>
+  <p>Open an issue at <a href="https://github.com/aveproject/ave">github.com/aveproject/ave</a>
+  or email <a href="mailto:aveproject.org@gmail.com">aveproject.org@gmail.com</a>.</p>
+  <p>Maintaining a scanner? Submit a crosswalk PR, we will help with the
+  mapping.</p>
+
+</div></article>
+<footer class="site">
+  <div class="wrap">
+    <div class="cols">
+      <div class="lic">
+        <p><b>AVE is an open standard.</b> The schema and records are published under Apache 2.0. AVE is moving toward neutral governance under an independent standards body, meant to outlive any single implementation, including Bawbel's.</p>
+        <p>Maps to OWASP MCP Top 10 &middot; OWASP Agentic AI Top 10 &middot; MITRE ATLAS &middot; OWASP AIVSS v0.8. The open record set can be consumed by any tool.</p>
+        <p class="citing"><b>Citing AVE.</b> Reference a record by its id, which is permanent and never reused: <span class="cmono">AVE-YYYY-NNNNN: Title. Agentic Vulnerability Enumeration (AVE), Bawbel/AVE Project. https://aveproject.org/registry.html#AVE-YYYY-NNNNN</span></p>
+      </div>
+      <div class="links">
+        <div>
+          <span class="h">Standard</span>
+          <a href="registry.html">Registry</a>
+          <a href="crosswalks.html">Crosswalks</a>
+          <a href="architecture.html">Architecture</a>
+          <a href="scoring.html">Scoring</a>
+          <a href="schema.html">Schema v1.1.0</a>
+          <a href="https://github.com/aveproject/ave" target="_blank">GitHub repo</a>
+        </div>
+        <div>
+          <span class="h">Implementations</span>
+          <a href="https://github.com/bawbel/scanner" target="_blank">Bawbel scanner (reference)</a>
+          <a href="architecture.html">Build your own</a>
+        </div>
+      </div>
+    </div>
+    <div class="base">
+      <span>&copy; 2026 AVE Project</span>
+      <span>Apache 2.0</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
