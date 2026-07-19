@@ -130,9 +130,15 @@ This guide covers three consumption patterns depending on your environment.</p>
   <p>Scanner emits <code>ave_id</code> in its finding output and optionally
   calls the AVE reference API at scan time to enrich with the full record.</p>
   <p><strong>API endpoint:</strong> <code>GET https://api.aveproject.org/records/{ave_id}</code></p>
-  <p>Returns: full record JSON including <code>behavioral_fingerprint</code>,
-  <code>indicators_of_compromise</code>, <code>remediation</code>,
-  <code>owasp_mcp</code>, <code>mitre_atlas</code>, <code>aivss</code>.</p>
+  <p>Returns the full record JSON, including:</p>
+  <ul class="field-list">
+    <li><code>behavioral_fingerprint</code></li>
+    <li><code>indicators_of_compromise</code></li>
+    <li><code>remediation</code></li>
+    <li><code>owasp_mcp</code></li>
+    <li><code>mitre_atlas</code></li>
+    <li><code>aivss</code></li>
+  </ul>
 
   <div class="codeblock-wrap"><button class="copy-btn" type="button" aria-label="Copy code" title="Copy">
     <svg class="i-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -152,10 +158,12 @@ finding = {
     "ave_record": enrich_finding("AVE-2026-00002"),
 }</div></div>
 
-  <p><strong>When to use:</strong> developer machines, cloud CI/CD
-  pipelines, SaaS tools with outbound internet.<br>
-  <strong>When not to use:</strong> air-gapped environments, regulated
-  environments where outbound calls to third-party APIs are blocked.</p>
+  <div class="use-case">
+    <p><strong>When to use:</strong> developer machines, cloud CI/CD
+    pipelines, SaaS tools with outbound internet.</p>
+    <p><strong>When not to use:</strong> air-gapped environments, regulated
+    environments where outbound calls to third-party APIs are blocked.</p>
+  </div>
 
   <h2>Pattern 2: Bundled offline record set</h2>
   <p>Download the full AVE record set at build/install time. Bundle it
@@ -163,15 +171,22 @@ finding = {
   <p><strong>Offline artifact, always current, no release tag required:</strong><br>
   <code>https://raw.githubusercontent.com/aveproject/ave/main/dist/ave-records-latest.json</code></p>
   <p>Regenerated automatically on every <code>records/</code> change on
-  <code>develop</code>; see <code>scripts/build-records.js</code>. A
-  companion manifest at <code>dist/ave-records-latest.manifest.json</code>
-  carries <code>schema_version</code>, <code>record_count</code>, and
-  <code>generated_at</code> for a cheap sanity check before parsing the
-  full array. A versioned, frozen snapshot is also committed at each
-  schema transition (<code>dist/ave-records-v1.1.0.json</code>, later
+  <code>develop</code>; see <code>scripts/build-records.js</code>.</p>
+
+  <p>A companion manifest at <code>dist/ave-records-latest.manifest.json</code>
+  carries three fields for a cheap sanity check before parsing the full
+  array:</p>
+  <ul class="field-list">
+    <li><code>schema_version</code></li>
+    <li><code>record_count</code></li>
+    <li><code>generated_at</code></li>
+  </ul>
+
+  <p>A versioned, frozen snapshot is also committed at each schema
+  transition (<code>dist/ave-records-v1.1.0.json</code>, later
   <code>dist/ave-records-v1.2.0.json</code>, and so on) for anyone who
   deliberately wants to pin to one point in time rather than track
-  current; a <a href="https://github.com/aveproject/ave/releases">GitHub
+  current. A <a href="https://github.com/aveproject/ave/releases">GitHub
   Release</a> attaches the matching frozen file as a second distribution
   point when one is cut, not the only one.</p>
   <p>Format: JSON array of all active records (59 as of schema v1.1.0).</p>
@@ -197,9 +212,11 @@ def lookup_ave(ave_id: str) -&gt; dict | None:
   stability, that file is frozen once written and never changes underneath
   you. Either way, do not auto-update at runtime; re-fetch on your own
   release cadence.</p>
-  <p><strong>When to use:</strong> air-gapped environments, regulated
-  environments, tools that cannot make outbound calls, offline-first
-  scanners.</p>
+  <div class="use-case">
+    <p><strong>When to use:</strong> air-gapped environments, regulated
+    environments, tools that cannot make outbound calls, offline-first
+    scanners.</p>
+  </div>
 
   <h2>Pattern 3: ID-only emission</h2>
   <p>Scanner emits <code>ave_id</code> in its finding output. No enrichment
@@ -227,9 +244,11 @@ def lookup_ave(ave_id: str) -&gt; dict | None:
 }</div></div>
 
   <p>Full SARIF convention: <a href="https://github.com/aveproject/ave/blob/main/docs/specs/ave-in-sarif.md">docs/specs/ave-in-sarif.md</a></p>
-  <p><strong>When to use:</strong> any environment. Especially useful when
-  the scanner runs in a restricted environment but findings are reviewed
-  in a connected dashboard.</p>
+  <div class="use-case">
+    <p><strong>When to use:</strong> any environment. Especially useful when
+    the scanner runs in a restricted environment but findings are reviewed
+    in a connected dashboard.</p>
+  </div>
 
   <h2>The mapping step</h2>
   <p>To emit AVE IDs, you need a mapping from your internal rule IDs to AVE
