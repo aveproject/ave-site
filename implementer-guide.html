@@ -100,6 +100,7 @@
       <a href="architecture.html">Architecture</a>
       <a href="scoring.html">Scoring</a>
       <a href="schema.html">Schema</a>
+      <a href="implementer-guide.html" class="active">Guide</a>
       <a class="gh" href="https://github.com/aveproject/ave" target="_blank">GitHub</a>
     </nav>
   </div>
@@ -133,7 +134,10 @@ This guide covers three consumption patterns depending on your environment.</p>
   <code>indicators_of_compromise</code>, <code>remediation</code>,
   <code>owasp_mcp</code>, <code>mitre_atlas</code>, <code>aivss</code>.</p>
 
-  <div class="codeblock">import httpx
+  <div class="codeblock-wrap"><button class="copy-btn" type="button" aria-label="Copy code" title="Copy">
+    <svg class="i-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+    <svg class="i-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  </button><div class="codeblock">import httpx
 
 def enrich_finding(ave_id: str) -&gt; dict:
     resp = httpx.get(f"https://api.aveproject.org/records/{ave_id}", timeout=5)
@@ -146,7 +150,7 @@ finding = {
     "severity": "HIGH",
     # optional: enrich at scan time
     "ave_record": enrich_finding("AVE-2026-00002"),
-}</div>
+}</div></div>
 
   <p><strong>When to use:</strong> developer machines, cloud CI/CD
   pipelines, SaaS tools with outbound internet.<br>
@@ -172,7 +176,10 @@ finding = {
   point when one is cut, not the only one.</p>
   <p>Format: JSON array of all active records (59 as of schema v1.1.0).</p>
 
-  <div class="codeblock">import json
+  <div class="codeblock-wrap"><button class="copy-btn" type="button" aria-label="Copy code" title="Copy">
+    <svg class="i-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+    <svg class="i-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  </button><div class="codeblock">import json
 from pathlib import Path
 
 # Load at startup
@@ -182,7 +189,7 @@ AVE_RECORDS = {
 }
 
 def lookup_ave(ave_id: str) -&gt; dict | None:
-    return AVE_RECORDS.get(ave_id)</div>
+    return AVE_RECORDS.get(ave_id)</div></div>
 
   <p><strong>Sync strategy:</strong> track <code>ave-records-latest.json</code>
   if you always want current data, or pin to a specific
@@ -203,7 +210,10 @@ def lookup_ave(ave_id: str) -&gt; dict | None:
   <p><strong>Example SARIF output</strong> (the correct way to carry
   <code>ave_id</code> in SARIF):</p>
 
-  <div class="codeblock">{
+  <div class="codeblock-wrap"><button class="copy-btn" type="button" aria-label="Copy code" title="Copy">
+    <svg class="i-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+    <svg class="i-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  </button><div class="codeblock">{
   "runs": [{
     "results": [{
       "ruleId": "your-rule-id",
@@ -214,7 +224,7 @@ def lookup_ave(ave_id: str) -&gt; dict | None:
       }
     }]
   }]
-}</div>
+}</div></div>
 
   <p>Full SARIF convention: <a href="https://github.com/aveproject/ave/blob/main/docs/specs/ave-in-sarif.md">docs/specs/ave-in-sarif.md</a></p>
   <p><strong>When to use:</strong> any environment. Especially useful when
@@ -241,11 +251,14 @@ def lookup_ave(ave_id: str) -&gt; dict | None:
   <h2>Minimum viable integration</h2>
   <p>The smallest possible integration is adding one field:</p>
 
-  <div class="codeblock">finding = {
+  <div class="codeblock-wrap"><button class="copy-btn" type="button" aria-label="Copy code" title="Copy">
+    <svg class="i-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+    <svg class="i-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  </button><div class="codeblock">finding = {
     "rule_id": "prompt-injection/tool-description",
     "severity": "HIGH",
     "ave_id": "AVE-2026-00002",  # add this
-}</div>
+}</div></div>
 
   <p>That is it. The ID is stable and permanent. No other changes required.
   Your users get cross-tool deduplication and links to the full behavioral
@@ -274,6 +287,7 @@ def lookup_ave(ave_id: str) -&gt; dict | None:
           <a href="architecture.html">Architecture</a>
           <a href="scoring.html">Scoring</a>
           <a href="schema.html">Schema v1.1.0</a>
+          <a href="implementer-guide.html">Implementer Guide</a>
           <a href="https://github.com/aveproject/ave" target="_blank">GitHub repo</a>
         </div>
         <div>
@@ -289,6 +303,20 @@ def lookup_ave(ave_id: str) -&gt; dict | None:
     </div>
   </div>
 </footer>
+
+<script>
+document.querySelectorAll('.codeblock-wrap').forEach(function(wrap){
+  var btn = wrap.querySelector('.copy-btn');
+  var code = wrap.querySelector('.codeblock');
+  if(!btn || !code) return;
+  btn.addEventListener('click', function(){
+    navigator.clipboard.writeText(code.textContent).then(function(){
+      btn.classList.add('done');
+      setTimeout(function(){ btn.classList.remove('done'); }, 1600);
+    }).catch(function(){});
+  });
+});
+</script>
 
 </body>
 </html>
