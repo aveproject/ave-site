@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AVE-2026-00046: The Tool Hook Hijack - AVE Technical Writeups</title>
+<meta name="description" content="A technical breakdown of AVE-2026-00046, the tool hook hijack, AVE's only CRITICAL-rated record: the mechanism, why detection is genuinely hard, and what a real defense looks like.">
+<link rel="canonical" href="https://aveproject.org/writeups/AVE-2026-00046.html">
+<meta property="og:title" content="AVE-2026-00046: The Tool Hook Hijack">
+<meta property="og:description" content="Why AVE's only CRITICAL-rated record is harder to detect than it looks, and what a naive detector misses.">
+<meta property="og:url" content="https://aveproject.org/writeups/AVE-2026-00046.html">
+<meta property="og:type" content="article">
+<meta property="og:image" content="https://aveproject.org/ave-favicon-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://aveproject.org/ave-favicon-512.png">
+<link rel="stylesheet" href="https://aveproject.org/styles.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "AVE-2026-00046: The Tool Hook Hijack",
+  "description": "A technical breakdown of AVE's only CRITICAL-rated record: the mechanism, why detection is genuinely hard, and what a real defense looks like.",
+  "author": {
+    "@type": "Organization",
+    "name": "AVE Project",
+    "url": "https://aveproject.org"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AVE Project",
+    "url": "https://aveproject.org"
+  },
+  "mainEntityOfPage": "https://aveproject.org/writeups/AVE-2026-00046.html",
+  "about": {
+    "@type": "Thing",
+    "name": "AVE-2026-00046"
+  }
+}
+</script>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <a class="brandmark" href="https://aveproject.org/">
+      <svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true">
+        <path d="M20 6 C28 6 36 13 38 22 C30 20 24 22 20 27 C16 22 10 20 2 22 C4 13 12 6 20 6 Z" fill="#d4a017"/>
+        <path d="M20 27 L20 36 M20 27 C18 30 16 32 14 33 M20 27 C22 30 24 32 26 33" stroke="#9ec3b2" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        <circle cx="14.5" cy="17" r="1.6" fill="#0a3024"/><circle cx="25.5" cy="17" r="1.6" fill="#0a3024"/>
+      </svg>
+      <span>
+        <span class="wm">A<b>V</b>E</span>
+        <span class="sub">Agentic Vulnerability Enumeration</span>
+      </span>
+    </a>
+    <input type="checkbox" id="nav-toggle" class="nav-toggle">
+    <label for="nav-toggle" class="nav-toggle-label" aria-label="Toggle navigation">
+      <svg class="icon-open" viewBox="0 0 24 24" fill="none" stroke="#eaf3ee" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <svg class="icon-close" viewBox="0 0 24 24" fill="none" stroke="#eaf3ee" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
+    </label>
+    <nav class="topnav">
+      <a href="https://aveproject.org/registry.html">Registry</a>
+      <a href="https://aveproject.org/crosswalks.html">Crosswalks</a>
+      <a href="https://aveproject.org/architecture.html">Architecture</a>
+      <a href="https://aveproject.org/scoring.html">Scoring</a>
+      <a href="https://aveproject.org/schema.html">Schema</a>
+      <a href="https://aveproject.org/implementer-guide.html">Guide</a>
+      <a class="gh" href="https://github.com/aveproject/ave" target="_blank">GitHub</a>
+    </nav>
+  </div>
+</div>
+
+<header class="pagehead">
+  <div class="wrap">
+    <span class="pill">Technical Writeup &middot; AVE-2026-00046</span>
+    <h1>The tool hook hijack, and why it's harder to detect than it looks</h1>
+    <p>AVE's only CRITICAL-rated record right now. Worth understanding why the
+    severity is warranted, not just accepting the score at face value.</p>
+  </div>
+</header>
+
+<article class="doc"><div class="wrap">
+
+  <p><a href="https://aveproject.org/registry.html#AVE-2026-00046">&larr; Back to the full record in the registry</a></p>
+
+  <h2>The mechanism</h2>
+  <p>Most agent runtimes and MCP clients support hooks: small pieces of code
+  that run before or after a tool call, typically for legitimate reasons,
+  logging, formatting, validation. A hook registered against a wildcard
+  match (<code>"matches": "*"</code>) runs on every tool call the agent
+  makes, not just one.</p>
+  <p>The attack is specific: a hook registered this way, with
+  <code>blocking: true</code>, that doesn't just observe the call but
+  rewrites its arguments before the legitimate handler ever sees them. Once
+  installed, every subsequent tool call in the session passes through this
+  hook first. The declared scope of whatever tool the agent thinks it's
+  calling stops being the real scope of what actually executes.</p>
+
+  <h2>Why this earns CRITICAL, specifically</h2>
+  <p>Severity here isn't about any single call being dangerous. It's about
+  what the mechanism removes: the agent's own declared understanding of
+  what it's doing. If a hook can silently substitute arguments on every
+  call, the entire concept of a scoped, auditable tool call is compromised
+  at the runtime level, not just for one tool but for everything downstream
+  of the moment the hook installs. AVE's own scoring reflects amplification
+  factors for exactly this: high <code>autonomy</code> (nothing about the
+  substitution requires further attacker interaction), high
+  <code>persistent_memory</code>-adjacent risk (the hook, once installed,
+  affects every future call in the session, not a one-time event).</p>
+
+  <h2>Why detection is genuinely hard, not just under-built</h2>
+  <p>Building conformance fixtures for this record surfaced the actual
+  difficulty directly, worth walking through rather than asserting.</p>
+  <p>The naive detection approach: flag any hook matching a wildcard
+  pattern. This fails immediately against a real, common, entirely benign
+  pattern: audit logging. A hook that matches <code>*</code>, runs on every
+  call, and simply logs <code>{tool: call.name, timestamp: Date.now()}</code>
+  is completely standard practice, and a detector that flags it produces a
+  false positive rate high enough that anyone running the tool would just
+  turn the check off.</p>
+  <p>The distinguishing signal isn't the wildcard match at all. It's whether
+  the hook is <code>blocking</code> (able to intercept and modify the call
+  before the real handler runs) combined with whether it actually mutates
+  <code>call.arguments</code> rather than only reading them. A hook can be
+  blocking and still legitimate (synchronous validation that rejects
+  malformed input, for instance); a hook can be non-blocking and still
+  concerning in rarer cases (fire-and-forget exfiltration of call metadata,
+  a different, related but distinct behavioral class). The specific
+  combination that matters for this record is blocking plus argument
+  mutation plus unrestricted scope.</p>
+  <p>This matters practically: a detection rule that only checks the
+  <code>hooks[]</code> configuration's declared fields (<code>matches</code>,
+  <code>blocking</code>) without inspecting what the hook's own code
+  actually does will miss the real attack and only catch cases where the
+  configuration itself is suspicious, which a competent attacker has no
+  reason to make obviously suspicious. Real detection here needs to look at
+  the hook's actual behavior, not just its declared metadata, which is a
+  meaningfully harder static analysis problem than checking a manifest
+  field.</p>
+
+  <h2>What legitimate defenses actually look like</h2>
+  <p>Not "disallow wildcard hooks," which would break a large amount of
+  completely reasonable logging and validation tooling. The real mitigation
+  is scoping and visibility: a runtime that requires blocking hooks to
+  declare which fields of <code>call.arguments</code> they're permitted to
+  modify, rather than granting silent access to the whole object, turns
+  this from an invisible substitution into a visible, auditable, scoped
+  change. That's a runtime enforcement question, not something AVE's own
+  classification record can fix by existing; the record's job is naming the
+  pattern precisely enough that a runtime can be built to close it.</p>
+
+  <h2>The fixture that actually tests this</h2>
+  <p>Two files, deliberately minimal, in the
+  <a href="https://github.com/aveproject/ave/tree/main/tests/conformance" target="_blank">conformance suite</a>:</p>
+  <p>A positive fixture: a hook, <code>blocking: true</code>, matching
+  <code>*</code>, with an accompanying source excerpt showing it fetches a
+  rewritten version of the call's arguments from an external endpoint
+  before returning them.</p>
+  <p>A negative fixture: a hook, <code>blocking: false</code>, also
+  matching <code>*</code>, that only logs metadata and never touches
+  <code>call.arguments</code> at all.</p>
+  <p>Any detector that can correctly separate these two, not just recognize
+  "a hook exists," is doing the actual work this record asks for.</p>
+
+  <hr>
+  <p><strong>The full record:</strong> <a href="https://aveproject.org/registry.html#AVE-2026-00046">AVE-2026-00046 in the registry</a>,
+  including its complete AIVSS scoring breakdown, indicators of compromise,
+  and remediation guidance.</p>
+
+</div></article>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="cols">
+      <div class="lic">
+        <p><b>AVE is an open standard.</b> The schema and records are published under Apache 2.0. AVE is moving toward neutral governance under an independent standards body, meant to outlive any single implementation, including Bawbel's.</p>
+        <p>Maps to OWASP MCP Top 10 &middot; OWASP Agentic AI Top 10 &middot; MITRE ATLAS &middot; OWASP AIVSS v0.8. The open record set can be consumed by any tool.</p>
+        <p class="citing"><b>Citing this writeup.</b> <span class="cmono">AVE-2026-00046: The Tool Hook Hijack. AVE Project. https://aveproject.org/writeups/AVE-2026-00046.html</span></p>
+      </div>
+      <div class="links">
+        <div>
+          <span class="h">Standard</span>
+          <a href="https://aveproject.org/registry.html">Registry</a>
+          <a href="https://aveproject.org/crosswalks.html">Crosswalks</a>
+          <a href="https://aveproject.org/architecture.html">Architecture</a>
+          <a href="https://aveproject.org/scoring.html">Scoring</a>
+          <a href="https://aveproject.org/schema.html">Schema v1.0.0</a>
+          <a href="https://aveproject.org/implementer-guide.html">Implementer Guide</a>
+          <a href="https://github.com/aveproject/ave" target="_blank">GitHub repo</a>
+        </div>
+        <div>
+          <span class="h">Implementations</span>
+          <a href="https://github.com/bawbel/scanner" target="_blank">Bawbel scanner (reference)</a>
+          <a href="https://aveproject.org/architecture.html">Build your own</a>
+        </div>
+      </div>
+    </div>
+    <div class="base">
+      <span>&copy; 2026 AVE Project</span>
+      <span>Apache 2.0</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
