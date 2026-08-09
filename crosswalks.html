@@ -172,6 +172,19 @@ different tools become comparable through a shared vocabulary.</p>
 (function () {
   var SEV_COLOR = { Critical: "#b3261e", High: "#c98a3a", Medium: "#5d6f66", Low: "#5d6f66" };
 
+  // These crosswalks have grown real depth (sub-cases, per-mapping notes,
+  // documented gaps) -- rendering their full mapping table on this page
+  // turns useful detail into an unreadable wall of text. They're listed
+  // as a one-line mention + GitHub link at the bottom instead. This is a
+  // deliberate editorial call, not something derivable from file size or
+  // mapping count (cfgaudit's note is shorter than SkillSpector's, for
+  // example), so it's a plain list here rather than a computed threshold.
+  var MINIMAL_CROSSWALKS = [
+    "cfgaudit-to-ave.json",
+    "nova-proximity-to-ave.json",
+    "ramparts-to-ave.json"
+  ];
+
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
@@ -272,6 +285,17 @@ different tools become comparable through a shared vocabulary.</p>
     );
   }
 
+  // One-line mention for a crosswalk that's too detailed to render in full
+  // here: tool name and a direct link to the real file on GitHub.
+  function renderMinimalEntry(data, file) {
+    var toolName = (data.source && data.source.tool) || file.replace(/\.json$/, "");
+    var githubUrl = "https://github.com/aveproject/ave/blob/main/crosswalks/" + encodeURIComponent(file);
+    return (
+      '<p class="note">' + escapeHtml(toolName) + " &rarr; AVE &mdash; " +
+      '<a href="' + githubUrl + '" target="_blank">View full crosswalk on GitHub &rarr;</a></p>'
+    );
+  }
+
   function renderCrosswalk(data) {
     // A "source -> AVE" crosswalk has data.source.tool. Two known shapes exist:
     //  - flat: mappings[] are leaf objects with their own ave_ids[] (SkillSpector)
@@ -296,6 +320,7 @@ different tools become comparable through a shared vocabulary.</p>
       var manifest = await manifestRes.json();
 
       var htmlParts = [];
+      var minimalParts = [];
       var failures = [];
 
       for (var i = 0; i < manifest.files.length; i++) {
@@ -304,10 +329,23 @@ different tools become comparable through a shared vocabulary.</p>
           var res = await fetch("crosswalks/" + file);
           if (!res.ok) throw new Error(res.status);
           var data = await res.json();
-          htmlParts.push(renderCrosswalk(data));
+          if (MINIMAL_CROSSWALKS.indexOf(file) !== -1) {
+            minimalParts.push(renderMinimalEntry(data, file));
+          } else {
+            htmlParts.push(renderCrosswalk(data));
+          }
         } catch (e) {
           failures.push(file);
         }
+      }
+
+      if (minimalParts.length) {
+        htmlParts.push(
+          '<section class="xw-section" style="padding-top:0;"><div class="wrap">' +
+          "<h2>More crosswalks</h2>" +
+          minimalParts.join("\n") +
+          "</div></section>"
+        );
       }
 
       loadingEl.style.display = "none";
