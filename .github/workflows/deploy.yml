@@ -78,16 +78,25 @@ jobs:
             --schema-dir ../ave/schema \
             --out-dir    schema
 
+      - name: Publish crosswalks from bawbel/ave
+        working-directory: ave-site
+        run: |
+          node scripts/publish-crosswalks.js \
+            --crosswalks-dir ../ave/crosswalks \
+            --out-dir        crosswalks
+
       - name: Print build summary
         working-directory: ave-site
         run: |
           RECORD_COUNT=$(node -e "const r=require('./records.js'); console.log(r.length)" 2>/dev/null || echo "unknown")
           SCHEMA_COUNT=$(ls schema/*.schema.json 2>/dev/null | wc -l | tr -d ' ')
+          CROSSWALK_COUNT=$(node -e "const m=require('./crosswalks/manifest.json'); console.log(m.files.length)" 2>/dev/null || echo "unknown")
           echo "## Build summary" >> $GITHUB_STEP_SUMMARY
           echo "| | |" >> $GITHUB_STEP_SUMMARY
           echo "|---|---|" >> $GITHUB_STEP_SUMMARY
           echo "| Records built | $RECORD_COUNT |" >> $GITHUB_STEP_SUMMARY
           echo "| Schema files published | $SCHEMA_COUNT |" >> $GITHUB_STEP_SUMMARY
+          echo "| Crosswalks published | $CROSSWALK_COUNT |" >> $GITHUB_STEP_SUMMARY
           echo "| Triggered by | ${{ github.event_name }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Ave records ref | $(cd ../ave && git rev-parse --short HEAD) |" >> $GITHUB_STEP_SUMMARY
           echo "| Site ref | $(cd ../ave-site && git rev-parse --short HEAD) |" >> $GITHUB_STEP_SUMMARY
