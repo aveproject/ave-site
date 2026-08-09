@@ -121,7 +121,7 @@ and detection layer; click any row for full detail, AIVSS scoring, and provenanc
   <div class="wrap">
     <div class="reg-head">
       <h2 style="font-size:20px;margin:0;">All records</h2>
-      <div class="count"><b id="rc">12</b> of <span id="tc">12</span> records</div>
+      <div class="count" id="countline"></div>
     </div>
     <div class="toolbar">
       <div class="field searchwrap">
@@ -148,6 +148,11 @@ and detection layer; click any row for full detail, AIVSS scoring, and provenanc
         <tbody id="rows"></tbody>
       </table>
       <div class="noresult" id="noresult" style="display:none;">No records match these filters.</div>
+      <div class="pagination" id="pagination">
+        <button class="pagebtn" id="pgPrev" type="button">&larr; Prev</button>
+        <span class="pageinfo" id="pageinfo"></span>
+        <button class="pagebtn" id="pgNext" type="button">Next &rarr;</button>
+      </div>
     </div>
   </div>
 </main>
@@ -231,6 +236,8 @@ RECORDS.forEach(r => {
 
 // ---- state ----
 let sortKey = 'ave_id', sortDir = 1;
+let currentPage = 1;
+const PAGE_SIZE = 50;
 const sevColor = {CRITICAL:'#a81f15',HIGH:'#b1490a',MEDIUM:'#8a6608',LOW:'#3f6e48'};
 const sevRank  = {CRITICAL:4,HIGH:3,MEDIUM:2,LOW:1};
 
@@ -276,19 +283,32 @@ function sorted(list){
 
 function render(){
   const list = sorted(RECORDS.filter(matches));
-  $('#rc').textContent = list.length;
-  $('#tc').textContent = RECORDS.length;
+  const totalFiltered = list.length;
+  const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+  const startIdx = (currentPage - 1) * PAGE_SIZE;
+  const pageList = list.slice(startIdx, startIdx + PAGE_SIZE);
+
+  const start = totalFiltered === 0 ? 0 : startIdx + 1;
+  const end = Math.min(startIdx + PAGE_SIZE, totalFiltered);
+  let countHtml = totalFiltered === 0
+    ? 'No records'
+    : `<b>${start}–${end}</b> of <b>${totalFiltered}</b> record${totalFiltered===1?'':'s'}`;
+  if (totalFiltered !== RECORDS.length) countHtml += ` <span class="total-note">(${RECORDS.length} total)</span>`;
+  $('#countline').innerHTML = countHtml;
+
   rowsEl.innerHTML = '';
-  noResult.style.display = list.length ? 'none' : 'block';
-  list.forEach(r=>{
+  noResult.style.display = totalFiltered ? 'none' : 'block';
+  pageList.forEach(r=>{
     const tr = document.createElement('tr');
     tr.tabIndex = 0;
     tr.innerHTML = `
-      <td class="id">${r.ave_id}</td>
-      <td class="title">${r.title}<span class="ac">${r.attack_class}</span></td>
-      <td><span class="sev ${r.severity}">${r.severity}</span></td>
-      <td class="hide-sm"><div class="aivss"><span class="num">${r.aivss.aivss_score.toFixed(1)}</span><span class="meter"><i style="width:${r.aivss.aivss_score*10}%;background:${sevColor[r.severity]}"></i></span></div></td>
-      <td class="hide-sm"><span class="layer"><span class="dot"></span>${r.detection_layer}</span></td>`;
+      <td class="id" data-label="AVE ID">${r.ave_id}</td>
+      <td class="title" data-label="Title / attack class"><span class="cellval">${r.title}<span class="ac">${r.attack_class}</span></span></td>
+      <td data-label="Severity"><span class="sev ${r.severity}">${r.severity}</span></td>
+      <td class="hide-sm" data-label="AIVSS"><div class="aivss"><span class="num">${r.aivss.aivss_score.toFixed(1)}</span><span class="meter"><i style="width:${r.aivss.aivss_score*10}%;background:${sevColor[r.severity]}"></i></span></div></td>
+      <td class="hide-sm" data-label="Layer"><span class="layer"><span class="dot"></span>${r.detection_layer}</span></td>`;
     tr.addEventListener('click', ()=>openDrawer(r));
     tr.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openDrawer(r);} });
     rowsEl.appendChild(tr);
@@ -296,6 +316,18 @@ function render(){
   // sort carets
   document.querySelectorAll('th[data-sort] .car').forEach(c=>c.textContent='');
   const th = document.querySelector(`th[data-sort="${sortKey}"] .car`); if(th) th.textContent = sortDir>0?'▲':'▼';
+
+  // pagination controls
+  $('#pageinfo').textContent = `Page ${currentPage} of ${totalPages}`;
+  $('#pgPrev').disabled = currentPage <= 1;
+  $('#pgNext').disabled = currentPage >= totalPages;
+  $('#pagination').style.display = totalPages <= 1 ? 'none' : 'flex';
+}
+
+function goToPage(n){
+  currentPage = n;
+  render();
+  $('.tablecard').scrollIntoView({ block: 'nearest' });
 }
 
 function chip(list, cls){ return (list&&list.length)? list.map(x=>`<span class="chip ${cls||''}">${x}</span>`).join('') : '<span style="color:var(--ink-3);font-family:var(--mono);font-size:12px;">none</span>'; }
@@ -392,11 +424,14 @@ function closeDrawer(){
 }
 
 // events
-$('#q').addEventListener('input', render);
-$('#f-sev').addEventListener('change', render);
-$('#f-ac').addEventListener('change', render);
-$('#f-layer').addEventListener('change', render);
-$('#clear').addEventListener('click', ()=>{ $('#q').value=''; $('#f-sev').value=''; $('#f-ac').value=''; $('#f-layer').value=''; render(); });
+function onFilterChange(){ currentPage = 1; render(); }
+$('#q').addEventListener('input', onFilterChange);
+$('#f-sev').addEventListener('change', onFilterChange);
+$('#f-ac').addEventListener('change', onFilterChange);
+$('#f-layer').addEventListener('change', onFilterChange);
+$('#clear').addEventListener('click', ()=>{ $('#q').value=''; $('#f-sev').value=''; $('#f-ac').value=''; $('#f-layer').value=''; currentPage = 1; render(); });
+$('#pgPrev').addEventListener('click', ()=>{ if(currentPage>1) goToPage(currentPage-1); });
+$('#pgNext').addEventListener('click', ()=>{ goToPage(currentPage+1); });
 document.querySelectorAll('th[data-sort]').forEach(th=>{
   th.addEventListener('click', ()=>{ const k=th.dataset.sort; if(sortKey===k) sortDir*=-1; else {sortKey=k; sortDir=1;} render(); });
 });
