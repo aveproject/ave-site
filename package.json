@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node scripts/build-records.js",
     "build:drafts": "node scripts/build-records.js --include-drafts",
-    "build:local": "node scripts/build-records.js --records-dir ../bawbel/ave/records",
+    "build:local": "node scripts/build-records.js --records-dir ../ave/records",
     "build:dry": "node scripts/build-records.js --dry-run",
     "build:schemas": "node scripts/publish-schemas.js",
     "build:schemas:dry": "node scripts/publish-schemas.js --dry-run",
