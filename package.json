@@ -10,6 +10,8 @@
     "build:dry": "node scripts/build-records.js --dry-run",
     "build:schemas": "node scripts/publish-schemas.js",
     "build:schemas:dry": "node scripts/publish-schemas.js --dry-run",
+    "build:crosswalks": "node scripts/publish-crosswalks.js",
+    "build:crosswalks:dry": "node scripts/publish-crosswalks.js --dry-run",
     "validate": "node scripts/build-records.js --dry-run"
   },
   "devDependencies": {
