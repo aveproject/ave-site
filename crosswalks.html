@@ -121,7 +121,9 @@ different tools become comparable through a shared vocabulary.</p>
   <div class="wrap">
     <div id="cw-loading" style="padding:30px 0;color:var(--ink-3);font-family:var(--mono);font-size:13px;">Loading crosswalks&hellip;</div>
     <div id="cw-error" style="display:none;padding:20px;background:#fff3f0;border:1px solid #e0a89a;border-radius:10px;color:#a33;font-size:14px;"></div>
-    <div id="cw-mount"></div>
+    <!-- AST10 renders here: it's the crosswalk that goes first, right
+         before the AVE -> OWASP/MITRE ATLAS table below. -->
+    <div id="cw-mount-primary"></div>
   </div>
 </section>
 
@@ -136,6 +138,12 @@ different tools become comparable through a shared vocabulary.</p>
     <p class="note" style="margin-top:18px;">Maintain a scanner? <a href="architecture.html">Map your finding types to AVE &rarr;</a></p>
   </div>
 </section>
+
+<!-- SkillSpector, ClawScan, any newly-added full-detail crosswalk, and
+     the "More crosswalks" one-liners render here, after the framework
+     table above. -->
+<div id="cw-mount-secondary"></div>
+
 <footer class="site">
   <div class="wrap">
     <div class="cols">
@@ -185,6 +193,16 @@ different tools become comparable through a shared vocabulary.</p>
     "ramparts-to-ave.json"
   ];
 
+  // Display order for the full-detail crosswalks. AST10 renders on its own,
+  // ahead of the static "AVE -> OWASP/MITRE ATLAS" table elsewhere on this
+  // page; everything else in SECONDARY_ORDER renders after that table.
+  // A crosswalk that's neither here nor in MINIMAL_CROSSWALKS (a newly
+  // added one, not yet triaged into either list) still renders in full,
+  // appended after the ones named below -- it never silently disappears
+  // for want of an entry in this list, only its position is unplaced.
+  var PRIMARY_CROSSWALK = "ave-to-ast10.json";
+  var SECONDARY_ORDER = ["skillspector-to-ave.json", "clawscan-to-ave.json"];
+
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
@@ -214,7 +232,10 @@ different tools become comparable through a shared vocabulary.</p>
   function renderFlatSourceToAve(data) {
     var toolName = data.source.tool;
     var title = escapeHtml(toolName) + " &rarr; AVE";
-    var sub = data.note ? "<p class=\"note\">" + escapeHtml(data.note) + "</p>" : "";
+    // Full width, not the site-wide .note cap: these crosswalk notes run
+    // long (600-1600 chars) and read badly squeezed into a 760px column
+    // when the section around them is much wider.
+    var sub = data.note ? "<p class=\"note\" style=\"max-width:100%;\">" + escapeHtml(data.note) + "</p>" : "";
     var rows = data.mappings.map(function (m) {
       var cat = firstKeyEndingWith(m, ["category", "module"]);
       var catHtml = escapeHtml(cat != null ? cat : "(uncategorised)");
@@ -237,7 +258,10 @@ different tools become comparable through a shared vocabulary.</p>
   function renderNestedSourceToAve(data) {
     var toolName = data.source.tool;
     var title = escapeHtml(toolName) + " &rarr; AVE";
-    var sub = data.note ? "<p class=\"note\">" + escapeHtml(data.note) + "</p>" : "";
+    // Full width, not the site-wide .note cap: these crosswalk notes run
+    // long (600-1600 chars) and read badly squeezed into a 760px column
+    // when the section around them is much wider.
+    var sub = data.note ? "<p class=\"note\" style=\"max-width:100%;\">" + escapeHtml(data.note) + "</p>" : "";
     var rows = [];
     data.mappings.forEach(function (m) {
       var moduleName = firstKeyEndingWith(m, ["module", "category"]) || "(module)";
@@ -261,7 +285,10 @@ different tools become comparable through a shared vocabulary.</p>
   // Expected shape: { target: {tool, ...}, mappings: [{ast_id, ast_title, ast_severity?, ave_ids[]}], coverage? }
   function renderAveToTarget(data) {
     var title = "AVE &rarr; " + escapeHtml(data.target.tool || data.target.standard || "Target");
-    var sub = data.note ? "<p class=\"note\">" + escapeHtml(data.note) + "</p>" : "";
+    // Full width, not the site-wide .note cap: these crosswalk notes run
+    // long (600-1600 chars) and read badly squeezed into a 760px column
+    // when the section around them is much wider.
+    var sub = data.note ? "<p class=\"note\" style=\"max-width:100%;\">" + escapeHtml(data.note) + "</p>" : "";
     var rows = data.mappings.map(function (m) {
       var label = escapeHtml(m.ast_id || m.id) + " &mdash; " + escapeHtml(m.ast_title || m.title);
       var sevBadge = "";
@@ -312,15 +339,15 @@ different tools become comparable through a shared vocabulary.</p>
   async function loadCrosswalks() {
     var loadingEl = document.getElementById("cw-loading");
     var errorEl = document.getElementById("cw-error");
-    var mountEl = document.getElementById("cw-mount");
+    var primaryMountEl = document.getElementById("cw-mount-primary");
+    var secondaryMountEl = document.getElementById("cw-mount-secondary");
 
     try {
       var manifestRes = await fetch("crosswalks/manifest.json");
       if (!manifestRes.ok) throw new Error("manifest.json " + manifestRes.status);
       var manifest = await manifestRes.json();
 
-      var htmlParts = [];
-      var minimalParts = [];
+      var dataByFile = {};
       var failures = [];
 
       for (var i = 0; i < manifest.files.length; i++) {
@@ -328,19 +355,47 @@ different tools become comparable through a shared vocabulary.</p>
         try {
           var res = await fetch("crosswalks/" + file);
           if (!res.ok) throw new Error(res.status);
-          var data = await res.json();
-          if (MINIMAL_CROSSWALKS.indexOf(file) !== -1) {
-            minimalParts.push(renderMinimalEntry(data, file));
-          } else {
-            htmlParts.push(renderCrosswalk(data));
-          }
+          dataByFile[file] = await res.json();
         } catch (e) {
           failures.push(file);
         }
       }
 
+      var primaryParts = [];
+      var secondaryParts = [];
+      var minimalParts = [];
+      var placed = {};
+
+      if (dataByFile[PRIMARY_CROSSWALK]) {
+        primaryParts.push(renderCrosswalk(dataByFile[PRIMARY_CROSSWALK]));
+        placed[PRIMARY_CROSSWALK] = true;
+      }
+
+      SECONDARY_ORDER.forEach(function (file) {
+        if (dataByFile[file]) {
+          secondaryParts.push(renderCrosswalk(dataByFile[file]));
+          placed[file] = true;
+        }
+      });
+
+      // Anything fetched successfully but not yet named above or in
+      // MINIMAL_CROSSWALKS: still render it in full, just appended after
+      // the explicitly-ordered ones, so a new crosswalk never silently
+      // disappears for want of a triage decision.
+      manifest.files.forEach(function (file) {
+        if (placed[file] || MINIMAL_CROSSWALKS.indexOf(file) !== -1) return;
+        if (dataByFile[file]) {
+          secondaryParts.push(renderCrosswalk(dataByFile[file]));
+          placed[file] = true;
+        }
+      });
+
+      MINIMAL_CROSSWALKS.forEach(function (file) {
+        if (dataByFile[file]) minimalParts.push(renderMinimalEntry(dataByFile[file], file));
+      });
+
       if (minimalParts.length) {
-        htmlParts.push(
+        secondaryParts.push(
           '<section class="xw-section" style="padding-top:0;"><div class="wrap">' +
           "<h2>More crosswalks</h2>" +
           minimalParts.join("\n") +
@@ -349,7 +404,8 @@ different tools become comparable through a shared vocabulary.</p>
       }
 
       loadingEl.style.display = "none";
-      mountEl.innerHTML = htmlParts.join("\n");
+      primaryMountEl.innerHTML = primaryParts.join("\n");
+      secondaryMountEl.innerHTML = secondaryParts.join("\n");
 
       if (failures.length) {
         errorEl.style.display = "block";
