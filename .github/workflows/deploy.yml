@@ -71,14 +71,23 @@ jobs:
             --out         records.js \
             $DRAFTS_FLAG
 
+      - name: Publish schema files from bawbel/ave
+        working-directory: ave-site
+        run: |
+          node scripts/publish-schemas.js \
+            --schema-dir ../ave/schema \
+            --out-dir    schema
+
       - name: Print build summary
         working-directory: ave-site
         run: |
           RECORD_COUNT=$(node -e "const r=require('./records.js'); console.log(r.length)" 2>/dev/null || echo "unknown")
+          SCHEMA_COUNT=$(ls schema/*.schema.json 2>/dev/null | wc -l | tr -d ' ')
           echo "## Build summary" >> $GITHUB_STEP_SUMMARY
           echo "| | |" >> $GITHUB_STEP_SUMMARY
           echo "|---|---|" >> $GITHUB_STEP_SUMMARY
           echo "| Records built | $RECORD_COUNT |" >> $GITHUB_STEP_SUMMARY
+          echo "| Schema files published | $SCHEMA_COUNT |" >> $GITHUB_STEP_SUMMARY
           echo "| Triggered by | ${{ github.event_name }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Ave records ref | $(cd ../ave && git rev-parse --short HEAD) |" >> $GITHUB_STEP_SUMMARY
           echo "| Site ref | $(cd ../ave-site && git rev-parse --short HEAD) |" >> $GITHUB_STEP_SUMMARY

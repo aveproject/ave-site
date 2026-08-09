@@ -8,6 +8,8 @@
     "build:drafts": "node scripts/build-records.js --include-drafts",
     "build:local": "node scripts/build-records.js --records-dir ../bawbel/ave/records",
     "build:dry": "node scripts/build-records.js --dry-run",
+    "build:schemas": "node scripts/publish-schemas.js",
+    "build:schemas:dry": "node scripts/publish-schemas.js --dry-run",
     "validate": "node scripts/build-records.js --dry-run"
   },
   "devDependencies": {
