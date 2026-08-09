@@ -185,6 +185,7 @@ and detection layer; click any row for full detail, AIVSS scoring, and provenanc
           <a href="schema.html">Schema v1.0.0</a>
           <a href="implementer-guide.html">Implementer Guide</a>
           <a href="https://github.com/aveproject/ave" target="_blank">GitHub repo</a>
+          <a href="https://api.aveproject.org" target="_blank">API</a>
         </div>
         <div>
           <span class="h">Implementations</span>
@@ -399,18 +400,27 @@ function openDrawer(r){
 
     <div class="cite">
       <div class="chead">
-        <h4>Cite this record</h4>
+        <h4>Reference this record</h4>
         <button class="copy" id="citebtn">Copy</button>
       </div>
       <div class="ref" id="citeref">${r.ave_id}: ${r.title}. Agentic Vulnerability Enumeration (AVE). <span class="pl">https://github.com/aveproject/ave/blob/main/records/${r.ave_id}.json</span></div>
       <div class="ref-sub">Browse this record: <a href="registry.html#${r.ave_id}">aveproject.org/registry.html#${r.ave_id}</a></div>
+      <div class="chead" style="margin-top:10px;margin-bottom:0;">
+        <span class="ref" style="margin:0;">Fetch via API: <span class="pl">curl https://api.aveproject.org/records/${r.ave_id}</span></span>
+        <button class="copy" id="apicitebtn">Copy</button>
+      </div>
     </div>`;
   // cite: copy canonical reference; also set a per-record permalink hash
   const citeText = `${r.ave_id}: ${r.title}. Agentic Vulnerability Enumeration (AVE). https://github.com/aveproject/ave/blob/main/records/${r.ave_id}.json`;
+  const apiText = `curl https://api.aveproject.org/records/${r.ave_id}`;
   history.replaceState(null,'',`#${r.ave_id}`);
   const cb = document.getElementById('citebtn');
   if(cb){ cb.addEventListener('click', ()=>{
     navigator.clipboard.writeText(citeText).then(()=>{ cb.textContent='Copied'; cb.classList.add('done'); setTimeout(()=>{cb.textContent='Copy'; cb.classList.remove('done');},1600); }).catch(()=>{});
+  }); }
+  const apicb = document.getElementById('apicitebtn');
+  if(apicb){ apicb.addEventListener('click', ()=>{
+    navigator.clipboard.writeText(apiText).then(()=>{ apicb.textContent='Copied'; apicb.classList.add('done'); setTimeout(()=>{apicb.textContent='Copy'; apicb.classList.remove('done');},1600); }).catch(()=>{});
   }); }
   $('#overlay').classList.add('open');
   const dr = $('#drawer'); dr.classList.add('open'); dr.setAttribute('aria-hidden','false');
