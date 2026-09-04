@@ -6,4 +6,7 @@
   <url><loc>https://aveproject.org/architecture.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://aveproject.org/scoring.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://aveproject.org/schema.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://aveproject.org/implementer-guide.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://aveproject.org/writeups/AVE-2026-00046.html</loc><changefreq>yearly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://aveproject.org/writeups/citation-audit.html</loc><changefreq>yearly</changefreq><priority>0.6</priority></url>
 </urlset>

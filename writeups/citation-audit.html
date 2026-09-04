@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Citation Audit: 72/102 Claims Fabricated - AVE Technical Writeups</title>
+<meta name="description" content="A June 2026 AVE research file turned out to be substantially fabricated. What the citation audit found, how it was caught, and what we did about it.">
+<link rel="canonical" href="https://aveproject.org/writeups/citation-audit.html">
+<meta property="og:title" content="We audited our own research file and found 72 of 102 claims fabricated">
+<meta property="og:description" content="Invented per-class taxonomies attributed to five real papers, one fabricated title, every downstream coverage number wrong. What we did about it.">
+<meta property="og:url" content="https://aveproject.org/writeups/citation-audit.html">
+<meta property="og:type" content="article">
+<meta property="og:image" content="https://aveproject.org/ave-favicon-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://aveproject.org/ave-favicon-512.png">
+<link rel="stylesheet" href="https://aveproject.org/styles.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "We audited our own research file and found 72 of 102 claims fabricated",
+  "description": "A June 2026 AVE research file mapping five external MCP security datasets against AVE's coverage was found to be substantially fabricated. The citation audit, the containment check, the sibling-file audit, and what none of it touched.",
+  "datePublished": "2026-09-05",
+  "dateModified": "2026-09-05",
+  "author": {
+    "@type": "Organization",
+    "name": "AVE Project",
+    "url": "https://aveproject.org"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AVE Project",
+    "url": "https://aveproject.org"
+  },
+  "mainEntityOfPage": "https://aveproject.org/writeups/citation-audit.html",
+  "about": {
+    "@type": "Thing",
+    "name": "Citation audit of benchmark-2026-06.md"
+  }
+}
+</script>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <a class="brandmark" href="https://aveproject.org/">
+      <svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true">
+        <path d="M20 6 C28 6 36 13 38 22 C30 20 24 22 20 27 C16 22 10 20 2 22 C4 13 12 6 20 6 Z" fill="#d4a017"/>
+        <path d="M20 27 L20 36 M20 27 C18 30 16 32 14 33 M20 27 C22 30 24 32 26 33" stroke="#9ec3b2" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        <circle cx="14.5" cy="17" r="1.6" fill="#0a3024"/><circle cx="25.5" cy="17" r="1.6" fill="#0a3024"/>
+      </svg>
+      <span>
+        <span class="wm">A<b>V</b>E</span>
+        <span class="sub">Agentic Vulnerability Enumeration</span>
+      </span>
+    </a>
+    <input type="checkbox" id="nav-toggle" class="nav-toggle">
+    <label for="nav-toggle" class="nav-toggle-label" aria-label="Toggle navigation">
+      <svg class="icon-open" viewBox="0 0 24 24" fill="none" stroke="#eaf3ee" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <svg class="icon-close" viewBox="0 0 24 24" fill="none" stroke="#eaf3ee" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
+    </label>
+    <nav class="topnav">
+      <a href="https://aveproject.org/registry.html">Registry</a>
+      <a href="https://aveproject.org/crosswalks.html">Crosswalks</a>
+      <a href="https://aveproject.org/architecture.html">Architecture</a>
+      <a href="https://aveproject.org/scoring.html">Scoring</a>
+      <a href="https://aveproject.org/schema.html">Schema</a>
+      <a href="https://aveproject.org/implementer-guide.html">Guide</a>
+      <a class="gh" href="https://github.com/aveproject/ave" target="_blank">GitHub</a>
+    </nav>
+  </div>
+</div>
+
+<header class="pagehead">
+  <div class="wrap">
+    <span class="pill">Technical Writeup &middot; Research Integrity</span>
+    <h1>We audited our own research file and found 72 of 102 claims fabricated</h1>
+    <p>Invented per-class taxonomies attributed to five real papers, one fabricated
+    paper title, every downstream coverage number computed from the invented
+    lists. What we found, how it was caught, and what we did and didn't do
+    about it.</p>
+  </div>
+</header>
+
+<article class="doc"><div class="wrap">
+
+  <p><a href="https://github.com/aveproject/ave/blob/main/docs/agents/research/benchmark-2026-06.md" target="_blank">&larr; The retracted research file, every correction kept inline</a></p>
+
+  <p class="lead">AVE (the Agentic Vulnerability Enumeration standard) keeps a
+  research directory documenting every pass we've run to check the corpus
+  against the current threat landscape. One of those files, a June 2026
+  benchmark report mapping five external MCP security datasets against
+  AVE's coverage, turned out to be substantially fabricated: invented
+  per-class taxonomies attributed to five real papers, one outright
+  fabricated paper title, and every downstream coverage number computed
+  from those invented lists. This is what we found, how we found it, and
+  what we did and didn't do about it.</p>
+
+  <h2>What was wrong</h2>
+  <p>The file claimed to map five published research datasets &mdash;
+  MCPSecBench, a formal MCP threat-model paper, Hou et al.'s MCP taxonomy,
+  MCP-SafetyBench, and MCPTox &mdash; against AVE's own record set, class by
+  class, to find genuine coverage gaps. An audit checking every one of
+  those class-level claims against each paper's real, current text found:</p>
+
+  <div class="callout gold">
+    <span class="k">Result</span>
+    <p><strong>102 checkable claims. 30 confirmed correct. 72 confirmed
+    wrong. 0 unverifiable.</strong></p>
+  </div>
+
+  <p>The shape of the failure matters more than the count. This was not
+  miscitation &mdash; a right paper with a wrong page number, a rounded
+  figure, a class renamed since drafting. Every cited paper is real. The
+  dataset-level facts, mostly just the class <em>counts</em>, were largely
+  accurate: MCPSecBench really does define 17 attack types, MCP-SafetyBench
+  really does define 20. What's wrong is everything under that: the file
+  listed <em>specific class names</em> for each dataset, and for four of
+  the five datasets, the large majority of those names do not appear
+  anywhere in the paper they're attributed to. Tool Poisoning, Prompt
+  Injection, and a handful of others matched. Credential Theft, Remote Code
+  Execution, Privilege Escalation, Server Impersonation, Cross-Server
+  Contamination, and a dozen more, all attributed to MCPSecBench
+  specifically, do not exist in that paper's real 17-class taxonomy at all.
+  The fifth dataset, MCPTox, was wrong at a deeper level than any
+  individual class name: the file described it as a content-safety and
+  toxicity benchmark. The real paper is entirely about tool-poisoning
+  attack detection, evaluated against 45 real MCP servers and 353 real
+  tools. It has no content-safety dimension whatsoever. None of the eleven
+  class names attributed to it exist in the real paper, because the real
+  paper isn't about what the file said it was about.</p>
+
+  <p>One more find, smaller but worth naming precisely: one of the five
+  papers was cited under a title that isn't its real title. The paper
+  exists, the arXiv ID resolves, and it says something different from what
+  its invented title implied.</p>
+
+  <p>Because every per-dataset "AVE coverage" table was computed against
+  these invented class lists, none of that analysis holds either. The
+  file's headline conclusion &mdash; that AVE had exactly one confirmed
+  genuine coverage gap, a missing resource-exhaustion / agentic-DoS record
+  &mdash; named a class that does not exist in either of the two papers
+  cited as independently confirming it.</p>
+
+  <h2>How it was caught</h2>
+  <p>Not by a dedicated review. A roadmap item &mdash; "add the
+  resource-exhaustion record this benchmark identified as our one
+  confirmed gap" &mdash; sat unresolved across two separate revisions of an
+  internal tracking document, each time deferred rather than actioned. On
+  the third pass, instead of carrying it forward again, it finally got
+  checked directly against the two papers it cited. Neither contained the
+  class. That produced a small, boring-looking GitHub issue: two specific
+  citations, checked and shown wrong.</p>
+
+  <p>The decision that mattered wasn't finding those two. It was refusing
+  to treat two wrong citations as the finding. Two wrong citations in a
+  document making dozens of citation-shaped claims is a sample, not a
+  conclusion, and the only way to know whether it generalizes is to check
+  the rest &mdash; so the entire file was audited, table by table, class by
+  class, against each paper's actual current primary text rather than
+  against a summary or against the file's own internal consistency.</p>
+
+  <h2>What we did about it</h2>
+  <p>The file was not deleted, and its wrong tables were not silently
+  corrected in place. Every retracted claim is still visible in the
+  document, marked inline, next to what checking it actually found &mdash;
+  the paper's real class list, quoted directly from its own tables,
+  sitting right beside the invented one it replaces. This is the same
+  practice we apply to every negative result: publish it, don't edit it
+  away, because a corrected document with no visible trace of what was
+  wrong is much easier to trust today and much easier to repeat
+  tomorrow.</p>
+
+  <p>What we explicitly did not do is re-derive the coverage analysis.
+  Figuring out what AVE's real relationship is to each paper's real,
+  actual taxonomy is a substantive research task &mdash; five datasets,
+  real class-by-class mechanism comparison &mdash; not a citation check,
+  and improvising it inside the same pass that just found the fabrication
+  would risk repeating the exact failure this pass exists to correct. The
+  file says this plainly, dataset by dataset: coverage against the real
+  taxonomy has not been re-derived. That's a separate, future piece of
+  work, not something we're claiming credit for having already done.</p>
+
+  <h2>Containment</h2>
+  <p>A wrong number that stays wrong only inside the file that produced it
+  is a research-quality problem. A wrong number that reaches somewhere
+  else &mdash; another document, a public comment, an external thread
+  &mdash; is a different problem, and one that doesn't wait for a
+  convenient time to fix.</p>
+
+  <p>We checked. Every retracted figure and claim was grepped across the
+  full repository, and every GitHub issue and pull request on the
+  project's own repo was searched for the same terms. Two live,
+  uncorrected instances turned up, both inside the project's own
+  changelog: a release-notes entry that had credited three shipped records
+  to this benchmark's "confirmed genuine gaps" analysis, and a stale
+  roadmap bullet that still asserted the resource-exhaustion gap as real
+  after it had already been dropped elsewhere. Both are corrected now, in
+  place, with the same visible-not-silent convention as the source
+  document itself. Neither correction touches the three records in
+  question &mdash; each of them carries its own independent, verified
+  primary sourcing (an RFC, a CWE entry, an OWASP document) that has
+  nothing to do with the retracted analysis; what was wrong was only the
+  sentence crediting their discovery to it.</p>
+
+  <p>Beyond the repo, we checked every external thread this project is
+  currently party to that could plausibly carry a number sourced from this
+  file &mdash; a pilot mapping submitted to a related OWASP project, an
+  open numbering discussion on another OWASP project's tracker, two
+  threads with an adjacent standards body, and the project's own prior
+  public issue threads &mdash; read in full, not just grepped. And we
+  checked for any social-media post that might have cited these
+  figures.</p>
+
+  <div class="callout gold">
+    <span class="k">Result</span>
+    <p><strong>We found nothing in any of them.</strong> That's a real
+    result, not a formality, and worth stating as plainly as the
+    fabrication itself: this stayed contained to the one document that
+    produced it.</p>
+  </div>
+
+  <h2>What it touched, and what it didn't</h2>
+  <p>We checked whether any of the corpus's 80 published records is
+  actually sourced from this file. None is. The one new record the file's
+  own "genuine gap" analysis recommended was never created &mdash; its
+  target ID was later reused for an unrelated, independently-sourced
+  record. And a direct search of every published record's own text for
+  this file's name, or any of its five dataset names, returns zero
+  matches. Whatever this file got wrong, it did not make it into anything
+  the corpus asks anyone to rely on.</p>
+
+  <h2>Checking the rest of the shelf</h2>
+  <p>A citation practice that produces one bad document and nowhere else
+  is a different, better situation than a practice that produces bad
+  documents whenever nobody happens to check. So we checked the other file
+  living alongside this one in the same research directory &mdash; a
+  separate benchmark pass, five CVEs, one peer-reviewed paper, a vendor
+  disclosure report, a research-body corroboration note, a MITRE ATLAS
+  technique ID, and a news report, eleven checkable external claims in
+  total.</p>
+
+  <div class="callout gold">
+    <span class="k">Result</span>
+    <p><strong>All eleven confirmed correct against their real, primary
+    sources. Zero wrong. Zero unverifiable.</strong></p>
+  </div>
+
+  <p>That result matters as much as the 72 that were wrong in the other
+  file. It means this wasn't a standing practice of citing without
+  checking &mdash; it was one document, produced one way, that didn't get
+  the same discipline applied to it before it was committed. That's a
+  real, meaningfully different situation from a practice-wide failure, and
+  it's worth saying so exactly that plainly rather than either
+  overclaiming systemic rot or quietly hoping the one bad file was the
+  whole story.</p>
+
+  <h2>Why this is the post, not a footnote</h2>
+  <p>It would be easy to write a piece about verification discipline that
+  leads with someone else's mistake &mdash; and there are real ones to
+  point to. But publishing that framing while sitting on a worse,
+  still-uncorrected failure of our own would be exactly the dishonesty a
+  post about verification discipline exists to argue against. The actual
+  news here is not that citation-checking catches errors in general. It's
+  that it caught this one, inside our own published research, after it
+  had already sat unfixed for two review cycles &mdash; and that finding
+  it changed what came next: audit the whole file rather than patch two
+  lines, contain the damage before writing anything else, check the
+  sibling document rather than assume it was fine too, and only then write
+  this.</p>
+
+  <p>None of that is a success story about a well-run verification
+  process. The process took months to catch this, and it was caught late,
+  by refusing to let a small finding stay small &mdash; not by the process
+  working as designed the first time. What we can actually stand behind is
+  narrower and more honest: once caught, it was checked as thoroughly as
+  we know how, corrected visibly, contained rather than left to spread,
+  and the parts we haven't finished &mdash; re-deriving real coverage
+  against each paper's actual taxonomy &mdash; are named as unfinished
+  rather than quietly assumed done.</p>
+
+  <hr>
+  <p><strong>The retracted file, in full:</strong> <a href="https://github.com/aveproject/ave/blob/main/docs/agents/research/benchmark-2026-06.md" target="_blank">docs/agents/research/benchmark-2026-06.md</a>,
+  every fabricated table kept visible next to its correction.
+  <strong>The audit and containment work:</strong> <a href="https://github.com/aveproject/ave/issues/241" target="_blank">issue #241</a>
+  and <a href="https://github.com/aveproject/ave/pull/249" target="_blank">PR #249</a>.</p>
+
+</div></article>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="cols">
+      <div class="lic">
+        <p><b>AVE is an open standard.</b> The schema and records are published under Apache 2.0. AVE is moving toward neutral governance under an independent standards body, meant to outlive any single implementation, including Bawbel's.</p>
+        <p>Maps to OWASP MCP Top 10 &middot; OWASP Agentic AI Top 10 &middot; MITRE ATLAS &middot; OWASP AIVSS v0.8. The open record set can be consumed by any tool.</p>
+        <p class="citing"><b>Citing this writeup.</b> <span class="cmono">We Audited Our Own Research File and Found 72 of 102 Claims Fabricated. AVE Project. https://aveproject.org/writeups/citation-audit.html</span></p>
+      </div>
+      <div class="links">
+        <div>
+          <span class="h">Standard</span>
+          <a href="https://aveproject.org/registry.html">Registry</a>
+          <a href="https://aveproject.org/crosswalks.html">Crosswalks</a>
+          <a href="https://aveproject.org/architecture.html">Architecture</a>
+          <a href="https://aveproject.org/scoring.html">Scoring</a>
+          <a href="https://aveproject.org/schema.html">Schema v1.1.0</a>
+          <a href="https://aveproject.org/implementer-guide.html">Implementer Guide</a>
+          <a href="https://github.com/aveproject/ave" target="_blank">GitHub repo</a>
+          <a href="https://api.aveproject.org" target="_blank">API</a>
+        </div>
+        <div>
+          <span class="h">Implementations</span>
+          <a href="https://github.com/bawbel/scanner" target="_blank">Bawbel scanner (reference)</a>
+          <a href="https://aveproject.org/architecture.html">Build your own</a>
+        </div>
+      </div>
+    </div>
+    <div class="base">
+      <span>&copy; 2026 AVE Project</span>
+      <span>Apache 2.0</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
