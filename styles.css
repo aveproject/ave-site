@@ -84,6 +84,15 @@
   .clearbtn { align-self: end; font-family: var(--mono); font-size: 13px; color: var(--ink-2); background: none; border: 1px solid var(--line-2); border-radius: 9px; padding: 10px 14px; cursor: pointer; height: 41px; }
   .clearbtn:hover { border-color: var(--brand); color: var(--brand); }
 
+  .count .total-note { color: var(--ink-3); font-weight: normal; }
+
+  /* pagination */
+  .pagination { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 16px 18px; border-top: 1px solid var(--line); }
+  .pagebtn { font-family: var(--mono); font-size: 13px; color: var(--ink-2); background: none; border: 1px solid var(--line-2); border-radius: 9px; padding: 8px 14px; cursor: pointer; }
+  .pagebtn:hover:not(:disabled) { border-color: var(--brand); color: var(--brand); }
+  .pagebtn:disabled { opacity: 0.4; cursor: default; }
+  .pageinfo { font-family: var(--mono); font-size: 13px; color: var(--ink-3); }
+
   /* table */
   .tablecard { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
   table.reg { width: 100%; border-collapse: collapse; }
@@ -224,6 +233,33 @@
     .xw-grid { grid-template-columns: 1fr; }
     .hero h1 { font-size: 38px; }
     table.reg .hide-sm { display: none; }
+  }
+
+  /* registry table -> stacked cards below 768px. Same data, not a
+     shrunk table: every cell becomes a labelled row inside a card,
+     with .hide-sm re-shown (the 920px rule above hides AIVSS/Layer to
+     save horizontal space in table mode; that constraint doesn't
+     exist once each field gets its own row). */
+  @media (max-width: 768px) {
+    table.reg, table.reg thead, table.reg tbody, table.reg tr, table.reg th, table.reg td {
+      display: block;
+    }
+    table.reg thead { display: none; }
+    table.reg tbody tr {
+      margin: 14px; border: 1px solid var(--line); border-radius: 12px; padding: 4px 14px;
+    }
+    table.reg td, table.reg td.hide-sm {
+      display: flex; justify-content: space-between; align-items: center; gap: 14px;
+      padding: 10px 0; border-bottom: 1px solid var(--line); text-align: right;
+    }
+    table.reg td:last-child { border-bottom: none; }
+    table.reg td::before {
+      content: attr(data-label);
+      font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--ink-3); text-align: left; flex-shrink: 0;
+    }
+    td.title .cellval { text-align: right; }
+    td.title .ac { margin-top: 3px; }
   }
 
 /* ============ shared nav active + multi-page ============ */
