@@ -152,6 +152,13 @@ standard for agentic AI components.</p>
     <p>Per-detection runtime values belong only on the scanner finding: confidence, confidence_band, actual evidence_stage, confidence_reason, derived, line, match, suppressed.</p>
   </div>
 
+  <h2>Field relationships</h2>
+  <p>Several AVE fields sound similar and mean different things. The notes
+  below explain the distinctions.</p>
+  <div id="tr-loading" style="padding:16px 0;color:var(--ink-3);font-family:var(--mono);font-size:13px;">Loading relationship notes&hellip;</div>
+  <div id="tr-error" style="display:none;padding:16px 18px;background:#fff3f0;border:1px solid #e0a89a;border-radius:10px;color:#a33;font-size:14px;"></div>
+  <div id="tr-mount"></div>
+
   <h2>Required fields</h2>
   <p>Eight fields are required on every record, including <code>draft</code>:</p>
   <div class="codeblock"><span class="g">ave_id &middot; schema_version &middot; status &middot; title
@@ -243,6 +250,73 @@ indicators_of_compromise &middot; remediation &middot; researcher</span></div>
     </div>
   </div>
 </footer>
+
+<script>
+(function () {
+  // Fetches docs/terms-relationships.md live from aveproject/ave and
+  // renders it into the "Field relationships" section above. Live rather
+  // than published at build time: the notify-ave-site workflow that
+  // triggers a rebuild on aveproject/ave push only watches records/**,
+  // schema/**, crosswalks/**, and dist/** -- not docs/**, so a
+  // build-time copy of this specific file would not stay fresh on its
+  // own. Fetching it directly avoids depending on that trigger covering
+  // a path it does not currently cover.
+  var SOURCE_URL = "https://raw.githubusercontent.com/aveproject/ave/main/docs/terms-relationships.md";
+  var GITHUB_VIEW_URL = "https://github.com/aveproject/ave/blob/main/docs/terms-relationships.md";
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  // Minimal markdown -> HTML for this one file's actual shape: paragraphs
+  // separated by a blank line, **bold** term pairs, and `inline code`.
+  // No headings, lists, or links in the source today -- not handled, so
+  // as not to add a rendering dependency for markdown features this
+  // content doesn't use.
+  function renderMarkdown(md) {
+    return md
+      .split(/\n\s*\n/)
+      .map(function (p) { return p.trim(); })
+      .filter(Boolean)
+      .map(function (p) {
+        var html = escapeHtml(p.replace(/\s+/g, " "));
+        html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+        html = html.replace(/`([^`]+?)`/g, "<code>$1</code>");
+        return "<p>" + html + "</p>";
+      })
+      .join("\n");
+  }
+
+  function showFallback(message) {
+    var loadingEl = document.getElementById("tr-loading");
+    var errorEl = document.getElementById("tr-error");
+    if (loadingEl) loadingEl.style.display = "none";
+    if (errorEl) {
+      errorEl.style.display = "block";
+      errorEl.innerHTML =
+        escapeHtml(message) + " " +
+        '<a href="' + GITHUB_VIEW_URL + '" target="_blank">View the relationship notes on GitHub &rarr;</a>';
+    }
+  }
+
+  fetch(SOURCE_URL)
+    .then(function (response) {
+      if (!response.ok) throw new Error("fetch failed: " + response.status);
+      return response.text();
+    })
+    .then(function (markdown) {
+      var loadingEl = document.getElementById("tr-loading");
+      var mountEl = document.getElementById("tr-mount");
+      if (loadingEl) loadingEl.style.display = "none";
+      if (mountEl) mountEl.innerHTML = renderMarkdown(markdown);
+    })
+    .catch(function () {
+      showFallback("Relationship notes could not be loaded.");
+    });
+})();
+</script>
 
 </body>
 </html>
