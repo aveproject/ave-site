@@ -228,6 +228,16 @@ different tools become comparable through a shared vocabulary.</p>
     return undefined;
   }
 
+  // A source-side value found via firstKeyEndingWith may be a single string
+  // (skillspector_category, semia_label) or an array (sss_rules,
+  // skillsentry_rules -- several source rule ids can map to one AVE id).
+  // Render either the same way rather than letting an array print as
+  // "[object Object]" or get silently dropped.
+  function joinLabel(v) {
+    if (v == null) return null;
+    return Array.isArray(v) ? v.join(", ") : String(v);
+  }
+
   // Renders a flat "source tool -> AVE" crosswalk (SkillSpector-shaped).
   // Mappings are flat objects with a *_category / *_module key, ave_ids[], notes.
   function renderFlatSourceToAve(data) {
@@ -238,10 +248,16 @@ different tools become comparable through a shared vocabulary.</p>
     // when the section around them is much wider.
     var sub = data.note ? "<p class=\"note\" style=\"max-width:100%;\">" + escapeHtml(data.note) + "</p>" : "";
     var rows = data.mappings.map(function (m) {
-      var cat = firstKeyEndingWith(m, ["category", "module"]);
+      // "category"/"module" cover SkillSpector-shaped files; "label"/"rules"
+      // cover Semia's semia_label and skill-security-scanner/skillsentry's
+      // *_rules arrays -- three more source-rule-id-shaped key names this
+      // crosswalk shape uses that the original suffix list didn't include.
+      var cat = joinLabel(firstKeyEndingWith(m, ["category", "module", "label", "rules"]));
       var catHtml = escapeHtml(cat != null ? cat : "(uncategorised)");
       if (m.gap) catHtml += ' <span style="color:var(--ink-3);font-size:11px;">&mdash; gap: ' + escapeHtml(m.gap) + "</span>";
-      var ids = m.ave_ids || [];
+      // ave_ids[] (SkillSpector) or a single ave_id (Semia, skill-security-scanner,
+      // skillsentry -- one AVE record, one or more source rules mapping onto it).
+      var ids = m.ave_ids || (m.ave_id ? [m.ave_id] : []);
       return "<tr><td class=\"mono\">" + catHtml + "</td><td>" + chipList(ids) + "</td></tr>";
     }).join("\n");
 
@@ -282,16 +298,34 @@ different tools become comparable through a shared vocabulary.</p>
     );
   }
 
+  // "AVE -> target framework" crosswalks each name their own pair of label
+  // fields (a primary id/layer and a secondary title/threat) -- crosswalk-
+  // 1.0.0.schema.json deliberately leaves per-crosswalk mapping keys
+  // unconstrained. Declared explicitly per file rather than guessed via a
+  // suffix search: MAESTRO's ave_ids/primary_ave_id fields both contain
+  // "id" as a substring, so a generic "ends with _id" search would match
+  // the wrong field (an array of AVE ids, not the MAESTRO layer name).
+  // AST10 stays the default so a crosswalk not listed here still renders
+  // using the original field names rather than breaking.
+  var AVE_TO_TARGET_LABEL_KEYS = {
+    "ave-to-ast10.json": ["ast_id", "ast_title"],
+    "ave-to-maestro.json": ["maestro_layer", "maestro_threat"]
+  };
+
   // Renders an "AVE -> target framework" crosswalk with per-category severity (AST10, ...).
-  // Expected shape: { target: {tool, ...}, mappings: [{ast_id, ast_title, ast_severity?, ave_ids[]}], coverage? }
-  function renderAveToTarget(data) {
+  // Expected shape: { target: {tool, ...}, mappings: [{<id-key>, <title-key>, ast_severity?, ave_ids[]}], coverage? }
+  function renderAveToTarget(data, file) {
     var title = "AVE &rarr; " + escapeHtml(data.target.tool || data.target.standard || "Target");
     // Full width, not the site-wide .note cap: these crosswalk notes run
     // long (600-1600 chars) and read badly squeezed into a 760px column
     // when the section around them is much wider.
     var sub = data.note ? "<p class=\"note\" style=\"max-width:100%;\">" + escapeHtml(data.note) + "</p>" : "";
+    var keys = AVE_TO_TARGET_LABEL_KEYS[file] || ["ast_id", "ast_title"];
+    var idKey = keys[0], titleKey = keys[1];
     var rows = data.mappings.map(function (m) {
-      var label = escapeHtml(m.ast_id || m.id) + " &mdash; " + escapeHtml(m.ast_title || m.title);
+      var idPart = m[idKey] != null ? m[idKey] : (m.ast_id || m.id);
+      var titlePart = m[titleKey] != null ? m[titleKey] : (m.ast_title || m.title);
+      var label = escapeHtml(idPart != null ? idPart : "") + " &mdash; " + escapeHtml(titlePart != null ? titlePart : "");
       var sevBadge = "";
       if (m.ast_severity) {
         var color = SEV_COLOR[m.ast_severity] || "#5d6f66";
@@ -324,17 +358,18 @@ different tools become comparable through a shared vocabulary.</p>
     );
   }
 
-  function renderCrosswalk(data) {
+  function renderCrosswalk(data, file) {
     // A "source -> AVE" crosswalk has data.source.tool. Two known shapes exist:
-    //  - flat: mappings[] are leaf objects with their own ave_ids[] (SkillSpector)
+    //  - flat: mappings[] are leaf objects with their own ave_ids[] (SkillSpector,
+    //    Semia, skill-security-scanner, skillsentry)
     //  - nested: mappings[] are modules containing rules[], each with ave_ids[] (ClawScan)
-    // An "AVE -> target" crosswalk has data.target instead (AST10).
+    // An "AVE -> target" crosswalk has data.target instead (AST10, MAESTRO).
     if (data.source && data.source.tool && data.mappings && data.mappings.length) {
       var first = data.mappings[0];
       if (first.rules) return renderNestedSourceToAve(data);
       return renderFlatSourceToAve(data);
     }
-    return renderAveToTarget(data);
+    return renderAveToTarget(data, file);
   }
 
   async function loadCrosswalks() {
@@ -368,13 +403,13 @@ different tools become comparable through a shared vocabulary.</p>
       var placed = {};
 
       if (dataByFile[PRIMARY_CROSSWALK]) {
-        primaryParts.push(renderCrosswalk(dataByFile[PRIMARY_CROSSWALK]));
+        primaryParts.push(renderCrosswalk(dataByFile[PRIMARY_CROSSWALK], PRIMARY_CROSSWALK));
         placed[PRIMARY_CROSSWALK] = true;
       }
 
       SECONDARY_ORDER.forEach(function (file) {
         if (dataByFile[file]) {
-          secondaryParts.push(renderCrosswalk(dataByFile[file]));
+          secondaryParts.push(renderCrosswalk(dataByFile[file], file));
           placed[file] = true;
         }
       });
@@ -386,7 +421,7 @@ different tools become comparable through a shared vocabulary.</p>
       manifest.files.forEach(function (file) {
         if (placed[file] || MINIMAL_CROSSWALKS.indexOf(file) !== -1) return;
         if (dataByFile[file]) {
-          secondaryParts.push(renderCrosswalk(dataByFile[file]));
+          secondaryParts.push(renderCrosswalk(dataByFile[file], file));
           placed[file] = true;
         }
       });
