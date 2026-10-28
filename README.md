@@ -54,13 +54,31 @@ node scripts/build-records.js
 # regenerates records.js from aveproject/ave's current published records
 ```
 
+## Generated files
+
+`schema/`, `crosswalks/*.json` (including `crosswalks/manifest.json`) and
+`records.js` are build outputs from
+[aveproject/ave](https://github.com/aveproject/ave). The deploy workflow
+regenerates them on every deploy and they are listed in `.gitignore`. These
+are build outputs from aveproject/ave; never edit or commit them. A committed
+copy is overwritten at deploy time, so it can only mislead whoever reads it.
+After publishing the schema files the deploy compares each one with
+`aveproject/ave` byte for byte and fails the build on any difference.
+
+The `.md` write-ups in `crosswalks/` are not produced by these scripts. They
+are plain tracked copies, the deploy does not refresh them, and no page links
+to them, so they can drift from `aveproject/ave`.
+
 ## Local development
 
 ```bash
 git clone https://github.com/aveproject/ave-site.git
-git clone https://github.com/aveproject/ave.git
+git clone https://github.com/aveproject/ave.git   # must sit next to ave-site
 cd ave-site
-node scripts/build-records.js --source ../ave
+npm ci
+npm run build:local        # records.js from ../ave/records
+npm run build:schemas      # schema/ from ../ave/schema
+npm run build:crosswalks   # crosswalks/*.json and manifest.json from ../ave/crosswalks
 python3 -m http.server 8080
 # or: npx serve .
 ```

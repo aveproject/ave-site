@@ -78,6 +78,30 @@ jobs:
             --schema-dir ../ave/schema \
             --out-dir    schema
 
+      - name: Verify published schema files match aveproject/ave byte for byte
+        working-directory: ave-site
+        run: |
+          AVE_COMMIT=$(git -C ../ave rev-parse HEAD)
+          echo "Comparing published schema files against aveproject/ave@$AVE_COMMIT"
+          status=0
+          for src in ../ave/schema/*.schema.json; do
+            f=$(basename "$src")
+            if ! cmp -s "$src" "schema/$f"; then
+              echo "::error::schema/$f differs from aveproject/ave@$AVE_COMMIT"
+              status=1
+            fi
+          done
+          for pub in schema/*.schema.json; do
+            if [ ! -f "../ave/schema/$(basename "$pub")" ]; then
+              echo "::error::$pub is not in aveproject/ave@$AVE_COMMIT"
+              status=1
+            fi
+          done
+          if [ "$status" -eq 0 ]; then
+            echo "All $(ls schema/*.schema.json | wc -l | tr -d ' ') published schema files match aveproject/ave@$AVE_COMMIT"
+          fi
+          exit "$status"
+
       - name: Publish crosswalks from aveproject/ave
         working-directory: ave-site
         run: |
