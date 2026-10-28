@@ -1,3 +1,8 @@
 node_modules/
-# records.js
 .DS_Store
+
+# Build outputs from aveproject/ave. deploy.yml regenerates these on every deploy;
+# never edit or commit them (see README, "Generated files").
+/schema/
+/crosswalks/*.json
+/records.js
