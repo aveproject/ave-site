@@ -12,13 +12,18 @@
     "build:schemas:dry": "node scripts/publish-schemas.js --dry-run",
     "build:crosswalks": "node scripts/publish-crosswalks.js",
     "build:crosswalks:dry": "node scripts/publish-crosswalks.js --dry-run",
-    "validate": "node scripts/build-records.js --dry-run"
+    "validate": "node scripts/build-records.js --dry-run",
+    "build:meta": "node scripts/build-site-meta.js --ave-dir ../ave",
+    "build:meta:offline": "node scripts/build-site-meta.js --ave-dir ../ave --offline",
+    "build:pages": "node scripts/build-pages.js --ave-dir ../ave",
+    "build:site": "npm run build:local && npm run build:schemas && npm run build:crosswalks && npm run build:meta && npm run build:pages"
   },
   "devDependencies": {
     "ajv": "^8.20.0",
-    "ajv-formats": "^3.0.1"
+    "ajv-formats": "^3.0.1",
+    "marked": "18.1.1"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   }
 }

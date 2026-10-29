@@ -6,15 +6,12 @@ Enumeration), the behavioral classification standard for agentic AI
 components.
 
 [![Deploy](https://github.com/aveproject/ave-site/actions/workflows/deploy.yml/badge.svg)](https://github.com/aveproject/ave-site/actions/workflows/deploy.yml)
-![Records](https://img.shields.io/badge/records-confirm_against_live_count-lightgrey)
-![Schema](https://img.shields.io/badge/schema-v1.1.0-blue)
+[![Records](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Faveproject%2Fave%2Fmain%2Fdist%2Fave-records-latest.manifest.json&query=%24.record_count&label=records)](https://aveproject.org/registry.html)
+[![Schema](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Faveproject%2Fave%2Fmain%2Fdist%2Fave-records-latest.manifest.json&query=%24.schema_version&label=schema&color=blue)](https://aveproject.org/versions.html)
 [![License](https://img.shields.io/badge/license-Apache_2.0-green)](LICENSE)
 
-Confirm the actual deploy workflow filename and the real, current record
-count before relying on the badges above; the deploy badge assumes
-`.github/workflows/deploy.yml` exists under that name, and the records
-badge is deliberately left as a placeholder rather than hand-typing a
-number likely to go stale the next time a record is added.
+The records and schema badges read `aveproject/ave`'s
+`dist/ave-records-latest.manifest.json`, so they never need editing.
 
 ---
 
@@ -35,8 +32,13 @@ how to use it. If a change is about what AVE says, it belongs in
 | [Crosswalks](https://aveproject.org/crosswalks.html) | Mappings from other scanners' categories to AVE ids |
 | [Architecture](https://aveproject.org/architecture.html) | The standard's own structure: records, fixtures, how an implementation consumes them |
 | [Scoring](https://aveproject.org/scoring.html) | AIVSS scoring methodology |
-| [Schema](https://aveproject.org/schema.html) | Field-by-field reference for the current schema version |
-| [Implementer Guide](https://aveproject.org/implementer-guide.html) | The three consumption patterns, which one fits which deployment |
+| [Schema](https://aveproject.org/schema.html) | Field-by-field reference for the current schema version, generated from the schema at build |
+| [Implementer Guide](https://aveproject.org/implementer-guide.html) | How to use AVE records in a tool, generated from `docs/specs/ave-implementer-guide.md` at build |
+| [Versions](https://aveproject.org/versions.html) | Every catalog release and schema version, and how to pin, verify and use a release offline |
+
+Every page's footer says which catalog release and which records it shows,
+for example `AVE catalog v1.2.0 + unreleased changes · schema 1.3.0 · 89 records`
+when the site's records are newer than the latest release.
 
 ## Data source: pulled, never owned
 
@@ -56,10 +58,24 @@ node scripts/build-records.js
 
 ## Generated files
 
-`schema/`, `crosswalks/*.json` (including `crosswalks/manifest.json`) and
-`records.js` are build outputs from
-[aveproject/ave](https://github.com/aveproject/ave). The deploy workflow
-regenerates them on every deploy and they are listed in `.gitignore`. These
+`schema/`, `crosswalks/*.json` (including `crosswalks/manifest.json`),
+`records.js`, `site-meta.js`, `schema.html` and `implementer-guide.html` are
+build outputs from [aveproject/ave](https://github.com/aveproject/ave). The
+deploy workflow regenerates them on every deploy and they are listed in
+`.gitignore`.
+
+- `site-meta.js` (`scripts/build-site-meta.js`): the newest `v*` tag of the
+  `aveproject/ave` checkout, its `dist/ave-records-latest.manifest.json`, and
+  every catalog release with its manifest, read from the GitHub Releases API.
+  The footer strip and `versions.html` read it.
+- `schema.html` and `implementer-guide.html` (`scripts/build-pages.js`): the
+  sources are `templates/schema.html` and `templates/implementer-guide.html`,
+  filled from `schema/ave-record.schema.json` and
+  `docs/specs/ave-implementer-guide.md`. Edit the templates for layout; edit
+  `aveproject/ave` for content. The guide is rendered with
+  [marked](https://github.com/markedjs/marked), pinned exactly in
+  `package.json`.
+ These
 are build outputs from aveproject/ave; never edit or commit them. A committed
 copy is overwritten at deploy time, so it can only mislead whoever reads it.
 After publishing the schema files the deploy compares each one with
@@ -76,9 +92,13 @@ git clone https://github.com/aveproject/ave-site.git
 git clone https://github.com/aveproject/ave.git   # must sit next to ave-site
 cd ave-site
 npm ci
+npm run build:site         # everything below, in order
+# or one at a time:
 npm run build:local        # records.js from ../ave/records
 npm run build:schemas      # schema/ from ../ave/schema
 npm run build:crosswalks   # crosswalks/*.json and manifest.json from ../ave/crosswalks
+npm run build:meta         # site-meta.js (needs network; build:meta:offline lists releases from tags only)
+npm run build:pages        # schema.html and implementer-guide.html from ../ave
 python3 -m http.server 8080
 # or: npx serve .
 ```
@@ -89,9 +109,11 @@ pages fetch JSON at runtime, and `fetch()` does not work against a
 
 ## Deployment
 
-GitHub Pages, custom domain `aveproject.org`. DNS and Pages configuration
-aren't duplicated here; see the repo's deployment workflow and GitHub
-Pages settings for the current setup.
+GitHub Pages, custom domain `aveproject.org`. `deploy.yml` runs on a push to
+`main`, when `aveproject/ave` dispatches a data update, once a day (a new
+catalog release or a change to the implementer guide does not dispatch one),
+and by hand. DNS and Pages configuration aren't duplicated here; see the
+repo's deployment workflow and GitHub Pages settings for the current setup.
 
 ## Related
 

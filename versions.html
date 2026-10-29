@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Versions: AVE Behavioral Classification Standard</title>
+<meta name="description" content="Every AVE catalog release and schema version, with checksums and files, and how to pin, verify and use a release offline.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0a3024">
+<link rel="canonical" href="https://aveproject.org/versions.html">
+
+<!-- Open Graph / social sharing -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://aveproject.org/versions.html">
+<meta property="og:title" content="Versions: AVE Behavioral Classification Standard">
+<meta property="og:description" content="Every AVE catalog release and schema version, with checksums and files, and how to pin, verify and use a release offline.">
+<meta property="og:image" content="https://aveproject.org/ave-favicon-512.png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:site_name" content="AVE: Agentic Vulnerability Enumeration">
+
+<!-- Twitter card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@bawbel_io">
+<meta name="twitter:title" content="Versions: AVE Behavioral Classification Standard">
+<meta name="twitter:description" content="Every AVE catalog release and schema version, with checksums and files, and how to pin, verify and use a release offline.">
+<meta name="twitter:image" content="https://aveproject.org/ave-favicon-512.png">
+
+<!-- Favicons -->
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/ave-favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KV0S12VEF3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-KV0S12VEF3');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+<div class="topbar">
+  <div class="wrap">
+    <a class="brandmark" href="index.html">
+      <svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true">
+        <path d="M20 6 C28 6 36 13 38 22 C30 20 24 22 20 27 C16 22 10 20 2 22 C4 13 12 6 20 6 Z" fill="#d4a017"/>
+        <path d="M20 27 L20 36 M20 27 C18 30 16 32 14 33 M20 27 C22 30 24 32 26 33" stroke="#9ec3b2" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        <circle cx="14.5" cy="17" r="1.6" fill="#0a3024"/><circle cx="25.5" cy="17" r="1.6" fill="#0a3024"/>
+      </svg>
+      <span>
+        <span class="wm">A<b>V</b>E</span>
+        <span class="sub">Agentic Vulnerability Enumeration</span>
+      </span>
+    </a>
+    <input type="checkbox" id="nav-toggle" class="nav-toggle">
+    <label for="nav-toggle" class="nav-toggle-label" aria-label="Toggle navigation">
+      <svg class="icon-open" viewBox="0 0 24 24" fill="none" stroke="#eaf3ee" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <svg class="icon-close" viewBox="0 0 24 24" fill="none" stroke="#eaf3ee" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
+    </label>
+    <nav class="topnav">
+      <a href="registry.html">Registry</a>
+      <a href="crosswalks.html">Crosswalks</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="scoring.html">Scoring</a>
+      <a href="schema.html">Schema</a>
+      <a href="implementer-guide.html">Guide</a>
+      <a href="versions.html" class="active">Versions</a>
+      <a class="gh" href="https://github.com/aveproject/ave" target="_blank">GitHub</a>
+    </nav>
+  </div>
+</div>
+<header class="pagehead">
+  <div class="wrap">
+    <span class="pill">Versions</span>
+    <h1>Releases and versions</h1>
+    <p>Every catalog release of the AVE record set and every schema version, with the
+checksums and files you need to pin one, verify it and use it offline.</p>
+  </div>
+</header>
+
+<article class="doc"><div class="wrap">
+
+  <noscript><p class="emptynote">The release and schema tables below are filled in by JavaScript from the site build. See <a href="https://github.com/aveproject/ave/releases">aveproject/ave releases</a> for the same list.</p></noscript>
+  <p id="meta-missing" class="emptynote" hidden>Release data is generated when the site is built (<code>npm run build:site</code>); this copy was not built, so the tables are empty. See <a href="https://github.com/aveproject/ave/releases">aveproject/ave releases</a>.</p>
+
+  <div class="vcards">
+    <div class="vcard" id="card-release">
+      <span class="k">Latest catalog release</span>
+      <div class="big" data-meta="release-tag">&nbsp;</div>
+      <p data-meta="release-line"></p>
+      <p class="sha" data-meta="release-sha"></p>
+      <p><a data-meta="release-link" href="https://github.com/aveproject/ave/releases">Release notes and files &rarr;</a></p>
+    </div>
+    <div class="vcard" id="card-site">
+      <span class="k">Records on this site</span>
+      <div class="big" data-meta="site-schema">&nbsp;</div>
+      <p data-meta="site-line"></p>
+      <p data-meta="site-relation"></p>
+      <p class="sha" data-meta="site-sha"></p>
+    </div>
+  </div>
+
+  <h2 id="release-vs-schema">Catalog release or schema version</h2>
+  <p>A catalog release is a fixed, checksummed copy of the whole record set, tagged
+  <code>vX.Y.Z</code> and never changed once published. A schema version describes the
+  shape of a single record; each record names its own <code>schema_version</code>, and the
+  two numbers move independently.</p>
+
+  <h2 id="releases">Catalog releases</h2>
+  <div class="tbl-wrap"><table class="ref stack-sm">
+    <thead><tr><th>Release</th><th>Published</th><th>Schema</th><th>Records</th><th>SHA-256 of ave-records.json</th><th>Files</th><th>Pin</th></tr></thead>
+    <tbody id="release-rows"></tbody>
+  </table></div>
+  <p>A release with all three files (<code>ave-records.json</code>, <code>ave-records.manifest.json</code>,
+  <code>SHA256SUMS</code>) and a provenance attestation can be pinned and verified; releases before
+  <code>v1.2.0</code> predate those files.</p>
+
+  <h2 id="schemas">Schema versions</h2>
+  <div class="tbl-wrap"><table class="ref stack-sm">
+    <thead><tr><th>Schema</th><th>Schema file</th><th>First record set on it</th></tr></thead>
+    <tbody id="schema-rows"></tbody>
+  </table></div>
+  <p>Versioned schema files and these record sets are frozen: they never change once
+  published, not even for a typo. The <a href="schema.html">field reference</a> always shows the
+  newest schema.</p>
+
+  <h2 id="pin">Pin and verify a release</h2>
+  <p>Run these on a machine with network access. They need <code>curl</code>, <code>git</code>,
+  Python 3.8 or later and, for the last step, the <a href="https://cli.github.com" target="_blank" rel="noopener">GitHub CLI</a>
+  signed in to any account. The tag is filled in with the newest release that can be pinned.</p>
+  <ol class="steps">
+    <li><p><strong>Download</strong> the three files of a release into a directory named after its tag.</p>
+      <div class="codeblock-wrap"><button class="copy-btn" type="button" aria-label="Copy code" title="Copy"><svg class="i-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg class="i-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></button><div class="codeblock">TAG=<span data-meta="pin-tag">v1.2.0</span>
+mkdir -p "ave-$TAG"
+for f in ave-records.json ave-records.manifest.json SHA256SUMS; do
+  curl -fsSL -o "ave-$TAG/$f" "https://github.com/aveproject/ave/releases/download/$TAG/$f"
+done</div></div></li>
+    <li><p><strong>Check the checksums.</strong> This catches a damaged download, not a forged release.</p>
+      <div class="codeblock-wrap"><button class="copy-btn" type="button" aria-label="Copy code" title="Copy"><svg class="i-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg class="i-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></button><div class="codeblock">(cd "ave-$TAG" &amp;&amp; sha256sum -c SHA256SUMS)</div></div></li>
+    <li><p><strong>Check the files against each other and the tag</strong>: the manifest describes the records file, and <code>source_commit</code> is the commit the tag points at.</p>
+      <div class="codeblock-wrap"><button class="copy-btn" type="button" aria-label="Copy code" title="Copy"><svg class="i-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg class="i-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></button><div class="codeblock">git -c advice.detachedHead=false clone -q --depth 1 --branch "$TAG" https://github.com/aveproject/ave ave-src
+python3 ave-src/scripts/check_release_assets.py "ave-$TAG" --tag "$TAG" --git-dir ave-src</div></div></li>
+    <li><p><strong>Check provenance</strong>: both files were built by the release workflow in <code>aveproject/ave</code>. This is the check that does not trust where you downloaded from.</p>
+      <div class="codeblock-wrap"><button class="copy-btn" type="button" aria-label="Copy code" title="Copy"><svg class="i-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg class="i-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></button><div class="codeblock">for f in ave-records.json ave-records.manifest.json; do
+  gh attestation verify "ave-$TAG/$f" --repo aveproject/ave \
+    --signer-workflow aveproject/ave/.github/workflows/catalog-release.yml
+done</div></div></li>
+  </ol>
+  <p>If any check fails, do not use the files: download them again, and keep using the
+  release you had. The <a href="implementer-guide.html#pin-and-verify-a-release">implementer guide</a>
+  explains each check and shows how to verify the files again each time your tool starts.</p>
+
+  <h2 id="offline">Use a release offline</h2>
+  <p>Stage the release on a connected host and run the checks above there, carry the three
+  files across, run <code>sha256sum -c SHA256SUMS</code> again on the offline host, and point your
+  tool at that directory. Refresh on a stated cadence and never fetch at scan time. The
+  guide's <a href="implementer-guide.html#air-gapped-use">air-gapped section</a> has the full
+  procedure, and the <a href="implementer-guide.html#the-api">reference API</a> can serve a
+  pinned release too (<code>?release=vX.Y.Z</code>).</p>
+
+  <h2 id="history">Two files named ave-records-v1.1.0.json</h2>
+  <p>The <code>v1.1.0</code> GitHub release (2026-06-24) shipped one asset,
+  <code>ave-records-v1.1.0.json</code>: 51 records on schema 1.0.0. The repository's
+  <code>dist/ave-records-v1.1.0.json</code>, added later (2026-07-19), holds 59 records on schema
+  1.1.0. They are different files with the same name: the first is named after a catalog release,
+  the second after a schema version. <code>v1.2.0</code> is the first release with the three
+  files above, and the first whose record set can be checked end to end.</p>
+
+</div></article>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="cols">
+      <div class="lic">
+        <p><b>AVE is an open standard.</b> The schema and records are published under Apache 2.0. AVE is moving toward neutral governance under an independent standards body, meant to outlive any single implementation, including Bawbel's.</p>
+        <p>Maps to OWASP MCP Top 10 &middot; OWASP Agentic AI Top 10 &middot; MITRE ATLAS &middot; OWASP AIVSS v0.8. The open record set can be consumed by any tool.</p>
+        <p class="citing"><b>Citing AVE.</b> Reference a record by its id, which is permanent and never reused: <span class="cmono">AVE-YYYY-NNNNN: Title. Agentic Vulnerability Enumeration (AVE). https://aveproject.org/registry.html#AVE-YYYY-NNNNN</span></p>
+      </div>
+      <div class="links">
+        <div>
+          <span class="h">Standard</span>
+          <a href="registry.html">Registry</a>
+          <a href="crosswalks.html">Crosswalks</a>
+          <a href="architecture.html">Architecture</a>
+          <a href="scoring.html">Scoring</a>
+          <a href="schema.html">Schema</a>
+          <a href="versions.html">Versions</a>
+          <a href="implementer-guide.html">Implementer Guide</a>
+          <a href="https://github.com/aveproject/ave" target="_blank">GitHub repo</a>
+          <a href="https://api.aveproject.org" target="_blank">API</a>
+        </div>
+        <div>
+          <span class="h">Implementations</span>
+          <a href="https://github.com/bawbel/scanner" target="_blank">Bawbel scanner (reference)</a>
+          <a href="architecture.html">Build your own</a>
+        </div>
+      </div>
+    </div>
+    <div class="base">
+      <span>&copy; 2026 AVE Project</span>
+      <span>Apache 2.0</span>
+      <span class="verstrip" data-ave-version="versions.html"></span>
+    </div>
+  </div>
+</footer>
+<script src="site-meta.js"></script>
+<script src="version-strip.js"></script>
+<script>
+(function () {
+  // Fills the cards and tables above from site-meta.js (scripts/build-site-meta.js).
+  var meta = window.AVE_SITE_META;
+  if (!meta) { document.getElementById("meta-missing").hidden = false; return; }
+  var REPO = "https://github.com/aveproject/ave";
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function set(name, html) {
+    document.querySelectorAll('[data-meta="' + name + '"]').forEach(function (el) { el.innerHTML = html; });
+  }
+  var muted = function (s) { return '<span class="emptynote">' + esc(s) + "</span>"; };
+  var day = function (s) { return esc(String(s || "").slice(0, 10)); };
+  var shortSha = function (s) { return s ? '<span class="sha" title="' + esc(s) + '">' + esc(s.slice(0, 16)) + "&hellip;</span>" : muted("not recorded"); };
+
+  var rel = meta.catalog;
+  var rm = rel.manifest;
+  set("release-tag", esc(rel.tag));
+  set("release-line", "published " + day(rel.date) + (rm ? " &middot; schema " + esc(rm.schema_version) + " &middot; " + esc(rm.record_count) + " records" : ""));
+  set("release-sha", rm ? "sha256 " + esc(rm.sha256) : "");
+  document.querySelectorAll('[data-meta="release-link"]').forEach(function (a) { a.href = REPO + "/releases/tag/" + encodeURIComponent(rel.tag); });
+
+  var lat = meta.latest;
+  set("site-schema", "schema " + esc(lat.schema_version));
+  set("site-line", esc(lat.record_count) + " records &middot; updated " + day(lat.generated_at));
+  set("site-relation", meta.latest_is_release
+    ? "Exactly catalog release " + esc(rel.tag) + "."
+    : "Newer than catalog release " + esc(rel.tag) + ": includes changes not yet released. Pin a release for results you can reproduce.");
+  set("site-sha", "sha256 " + esc(lat.sha256));
+
+  var pinnable = (meta.releases || []).filter(function (r) { return r.pinnable; })[0];
+  if (pinnable) set("pin-tag", esc(pinnable.tag));
+
+  document.getElementById("release-rows").innerHTML = (meta.releases || []).map(function (r) {
+    var m = r.manifest;
+    var files = (r.assets || []).length
+      ? (r.assets || []).map(function (a) { return '<a href="' + esc(a.url) + '">' + esc(a.name) + "</a>"; }).join("<br>")
+      : muted("none");
+    var pin = r.pinnable === null ? muted("unknown")
+      : r.pinnable ? '<span class="pinflag y">yes</span>' : '<span class="pinflag n">no</span>';
+    return "<tr><td class=\"mono\"><a href=\"" + esc(r.url) + "\">" + esc(r.tag) + "</a></td>" +
+      "<td class=\"mono inl\" data-label=\"Published\">" + day(r.published_at) + "</td>" +
+      "<td class=\"mono inl\" data-label=\"Schema\">" + (m ? esc(m.schema_version) : muted("not recorded")) + "</td>" +
+      "<td class=\"mono inl\" data-label=\"Records\">" + (m ? esc(m.record_count) : muted("not recorded")) + "</td>" +
+      "<td data-label=\"SHA-256\">" + shortSha(m && m.sha256) + "</td><td class=\"mono\" data-label=\"Files\">" + files + "</td><td class=\"inl\" data-label=\"Pin\">" + pin + "</td></tr>";
+  }).join("");
+
+  document.getElementById("schema-rows").innerHTML = (meta.schemas || []).map(function (s, i) {
+    var current = i === 0 ? ' <span class="pinflag y">current</span>' : "";
+    var snap = s.snapshot
+      ? '<a href="' + REPO + "/blob/main/" + esc(s.snapshot.file) + '">' + esc(s.snapshot.file) + "</a> &middot; " + esc(s.snapshot.record_count) + " records"
+      : muted("none: published before snapshots were kept");
+    return "<tr><td class=\"mono\">" + esc(s.version) + current + "</td>" +
+      "<td class=\"mono\" data-label=\"Schema file\"><a href=\"" + esc(s.file) + "\">" + esc(s.file) + "</a></td><td class=\"mono\" data-label=\"First record set\">" + snap + "</td></tr>";
+  }).join("");
+})();
+
+document.querySelectorAll('.codeblock-wrap').forEach(function (wrap) {
+  var btn = wrap.querySelector('.copy-btn');
+  var code = wrap.querySelector('.codeblock');
+  if (!btn || !code) return;
+  btn.addEventListener('click', function () {
+    navigator.clipboard.writeText(code.textContent).then(function () {
+      btn.classList.add('done');
+      setTimeout(function () { btn.classList.remove('done'); }, 1600);
+    }).catch(function () {});
+  });
+});
+</script>
+</body>
+</html>
