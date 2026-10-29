@@ -6,3 +6,8 @@ node_modules/
 /schema/
 /crosswalks/*.json
 /records.js
+# Generated from aveproject/ave by scripts/build-site-meta.js and scripts/build-pages.js
+# (templates/ holds the page sources); see README, "Generated files".
+/site-meta.js
+/schema.html
+/implementer-guide.html

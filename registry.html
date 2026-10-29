@@ -103,6 +103,7 @@
       <a href="scoring.html">Scoring</a>
       <a href="schema.html">Schema</a>
       <a href="implementer-guide.html">Guide</a>
+      <a href="versions.html">Versions</a>
       <a class="gh" href="https://github.com/aveproject/ave" target="_blank">GitHub</a>
     </nav>
   </div>
@@ -182,7 +183,8 @@ and detection layer; click any row for full detail, AIVSS scoring, and provenanc
           <a href="crosswalks.html">Crosswalks</a>
           <a href="architecture.html">Architecture</a>
           <a href="scoring.html">Scoring</a>
-          <a href="schema.html">Schema v1.0.0</a>
+          <a href="schema.html">Schema</a>
+          <a href="versions.html">Versions</a>
           <a href="implementer-guide.html">Implementer Guide</a>
           <a href="https://github.com/aveproject/ave" target="_blank">GitHub repo</a>
           <a href="https://api.aveproject.org" target="_blank">API</a>
@@ -197,6 +199,7 @@ and detection layer; click any row for full detail, AIVSS scoring, and provenanc
     <div class="base">
       <span>&copy; 2026 AVE Project</span>
       <span>Apache 2.0</span>
+      <span class="verstrip" data-ave-version="versions.html"></span>
     </div>
   </div>
 </footer>
@@ -306,7 +309,7 @@ function render(){
     tr.tabIndex = 0;
     tr.innerHTML = `
       <td class="id" data-label="AVE ID">${r.ave_id}</td>
-      <td class="title" data-label="Title / attack class"><span class="cellval">${r.title}<span class="ac">${r.attack_class}</span></span></td>
+      <td class="title" data-label="Title / attack class"><span class="cellval">${r.title}${statusBadge(r)}<span class="ac">${r.attack_class}</span></span></td>
       <td data-label="Severity"><span class="sev ${r.severity}">${r.severity}</span></td>
       <td class="hide-sm" data-label="AIVSS"><div class="aivss"><span class="num">${r.aivss.aivss_score.toFixed(1)}</span><span class="meter"><i style="width:${r.aivss.aivss_score*10}%;background:${sevColor[r.severity]}"></i></span></div></td>
       <td class="hide-sm" data-label="Layer"><span class="layer"><span class="dot"></span>${r.detection_layer}</span></td>`;
@@ -333,6 +336,20 @@ function goToPage(n){
 
 function chip(list, cls){ return (list&&list.length)? list.map(x=>`<span class="chip ${cls||''}">${x}</span>`).join('') : '<span style="color:var(--ink-3);font-family:var(--mono);font-size:12px;">none</span>'; }
 
+// A record that left 'active' (deprecated, merged, rejected; schema 1.3.0) stays listed,
+// labelled with its status; any status other than active counts as not active.
+function statusBadge(r){ return r.status && r.status!=='active' ? `<span class="status-badge ${r.status}">${r.status}</span>` : ''; }
+function escText(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function linkify(s){ return escText(s).replace(/https:\/\/[^\s<)]+/g, u=>`<a href="${u}" target="_blank" rel="noopener">${u}</a>`); }
+function statusNotice(r){
+  if(!r.status || r.status==='active') return '';
+  const what = r.status==='merged' && r.merged_into
+    ? `merged into <a href="#${r.merged_into}">${r.merged_into}</a>; use that record instead`
+    : r.status==='rejected' ? `rejected: ${r.rejection_reason?linkify(r.rejection_reason):'not a distinct behavioral class'}`
+    : r.status==='deprecated' ? 'deprecated: superseded by a better understanding of the same class; see the record history for why'
+    : `${escText(r.status)}`;
+  return `<div class="callout gold"><p style="margin:0">This record is ${what}. It stays listed and keeps its id; treat it as not active.</p></div>`;
+}
 function openDrawer(r){
   $('#d-id').textContent = r.ave_id + '  ·  ' + r.status + '  ·  schema ' + r.schema_version;
   $('#d-title').textContent = r.title;
@@ -343,7 +360,7 @@ function openDrawer(r){
   const chain = r.derivable_into && r.derivable_into.length
     ? `<div class="chain">${r.derivable_into.map(c=>`<span class="link">${c}</span>`).join('<span class="arr">→</span>')}</div>`
     : '<p style="color:var(--ink-3);font-family:var(--mono);font-size:13px;">Does not chain into a known toxic flow.</p>';
-  $('#d-body').innerHTML = `
+  $('#d-body').innerHTML = statusNotice(r) + `
     <div class="prov">
       <h3>Provenance: where this record comes from</h3>
       <ul>${provHtml}</ul>
@@ -393,6 +410,9 @@ function openDrawer(r){
         <span class="k">detection_stage</span><span class="v">${r.detection_stage||'&mdash;'}</span>
         <span class="k">confidence_baseline</span><span class="v">${r.confidence_baseline||'&mdash;'}</span>
         <span class="k">published</span><span class="v">${r.published?r.published.split('T')[0]:'&mdash;'}</span>
+        <span class="k">last_updated</span><span class="v">${r.last_updated?r.last_updated.split('T')[0]:'not recorded'}</span>
+        ${r.merged_into?`<span class="k">merged_into</span><span class="v"><a href="#${r.merged_into}">${r.merged_into}</a></span>`:''}
+        ${r.rejection_reason?`<span class="k">rejection_reason</span><span class="v">${linkify(r.rejection_reason)}</span>`:''}
         <span class="k">researcher</span><span class="v">${r.researcher||'&mdash;'}</span>
       </div></div>
     </div>
@@ -448,7 +468,7 @@ document.querySelectorAll('th[data-sort]').forEach(th=>{
 $('#dclose').addEventListener('click', closeDrawer);
 $('#overlay').addEventListener('click', closeDrawer);
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeDrawer(); });
-const docLabels={schema:'Schema v1.0.0 reference',architecture:'AVE architecture (implementer guide)',crosswalk:'crosswalk tables',adopt:'\'Adopt AVE in your tool\' guide'};
+const docLabels={schema:'schema reference',architecture:'AVE architecture (implementer guide)',crosswalk:'crosswalk tables',adopt:'\'Adopt AVE in your tool\' guide'};
 document.querySelectorAll('[data-doc]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault(); alert('Opens the '+(docLabels[a.dataset.doc]||a.dataset.doc)+' in the full site build.');}));
 
 // pre-fill search from the SearchAction's ?q= query param
@@ -465,11 +485,16 @@ if (typeof window.RECORDS === 'undefined' || !window.RECORDS || window.RECORDS.l
 } else {
   render();
 }
-// deep link: open a record if the URL points to one
-(function(){
+// deep link: open a record if the URL points to one, on load and when a link
+// on the page (merged_into, for example) changes the hash
+function openFromHash(){
   const m = location.hash.match(/AVE-\d{4}-\d{5}/);
-  if(m){ const rec = RECORDS.find(r=>r.ave_id===m[0]); if(rec) openDrawer(rec); }
-})();
+  if(m && window.RECORDS){ const rec = RECORDS.find(r=>r.ave_id===m[0]); if(rec) openDrawer(rec); }
+}
+openFromHash();
+window.addEventListener('hashchange', openFromHash);
 </script>
+<script src="site-meta.js"></script>
+<script src="version-strip.js"></script>
 </body>
 </html>

@@ -10,6 +10,13 @@ on:
   repository_dispatch:
     types: [ave-records-updated]
 
+  # Daily: a new catalog release or a change to the implementer guide in
+  # aveproject/ave does not trigger the dispatch above (it fires only for
+  # records/, schema/, crosswalks/ and dist/), so versions.html and the
+  # generated guide would otherwise wait for the next data change
+  schedule:
+    - cron: "17 5 * * *"
+
   # Allow manual trigger from the Actions tab
   workflow_dispatch:
     inputs:
@@ -44,6 +51,9 @@ jobs:
         with:
           repository: aveproject/ave
           path: ave
+          # full history and tags: the version strip and versions.html name the
+          # newest v* catalog release tag
+          fetch-depth: 0
           # If aveproject/ave is private, add:
           # token: ${{ secrets.AVE_REPO_TOKEN }}
 
@@ -109,6 +119,17 @@ jobs:
             --crosswalks-dir ../ave/crosswalks \
             --out-dir        crosswalks
 
+      - name: Build site metadata (catalog release, schema version, releases)
+        working-directory: ave-site
+        env:
+          # read-only use of the public Releases API; avoids the unauthenticated rate limit
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/build-site-meta.js --ave-dir ../ave --out site-meta.js
+
+      - name: Generate schema.html and implementer-guide.html from aveproject/ave
+        working-directory: ave-site
+        run: node scripts/build-pages.js --ave-dir ../ave --out-dir .
+
       - name: Print build summary
         working-directory: ave-site
         run: |
@@ -121,6 +142,8 @@ jobs:
           echo "| Records built | $RECORD_COUNT |" >> $GITHUB_STEP_SUMMARY
           echo "| Schema files published | $SCHEMA_COUNT |" >> $GITHUB_STEP_SUMMARY
           echo "| Crosswalks published | $CROSSWALK_COUNT |" >> $GITHUB_STEP_SUMMARY
+          META=$(node -e "const m=require('./site-meta.js'); console.log(m.catalog.tag + ' | schema ' + m.latest.schema_version + ', ' + m.latest.record_count + ' records' + (m.latest_is_release ? '' : ', newer than the release'))" 2>/dev/null || echo "unknown")
+          echo "| Catalog release, site records | $META |" >> $GITHUB_STEP_SUMMARY
           echo "| Triggered by | ${{ github.event_name }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Ave records ref | $(cd ../ave && git rev-parse --short HEAD) |" >> $GITHUB_STEP_SUMMARY
           echo "| Site ref | $(cd ../ave-site && git rev-parse --short HEAD) |" >> $GITHUB_STEP_SUMMARY
