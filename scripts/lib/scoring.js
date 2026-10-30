@@ -264,7 +264,7 @@ function renderThm(contributing, schema, summary) {
     .concat(stray.map(([v, n]) => `      <tr><td class="mono">${esc(fmt(v))}</td><td>not a documented value</td><td class="num">${n} of ${summary.total}</td></tr>`));
   const mf = [...summary.mitigation.entries()].sort((x, y) => y[0] - x[0]);
   const mfRows = mf.map(([v, n]) => `      <tr><td class="mono">${esc(fmt(v))}</td><td class="num">${n} of ${summary.total}</td></tr>`);
-  return `<p><strong>ThM</strong>: ${esc(a.thm.description)} The schema allows ${a.thm.minimum} to ${a.thm.maximum}; the AVE documents list ${contributing.thm.length}. How often each is used:</p>\n` +
+  return `<p><strong>ThM</strong>: ${esc(a.thm.description)} The schema allows ${a.thm.minimum} to ${a.thm.maximum}; the AVE documents list ${plural(contributing.thm.length, "value", "values")}. How often each is used:</p>\n` +
     `    <div class="tbl-wrap"><table class="ref"><thead><tr><th>ThM</th><th>When to use it</th><th class="num">Records</th></tr></thead><tbody>\n` +
     thmRows.join("\n") + `\n    </tbody></table></div>\n` +
     `    <p><strong>Mitigation_Factor</strong>: ${esc(a.mitigation_factor.description)} The values in use, and how often:</p>\n` +
