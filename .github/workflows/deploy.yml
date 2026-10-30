@@ -148,12 +148,27 @@ jobs:
           echo "| Ave records ref | $(cd ../ave && git rev-parse --short HEAD) |" >> $GITHUB_STEP_SUMMARY
           echo "| Site ref | $(cd ../ave-site && git rev-parse --short HEAD) |" >> $GITHUB_STEP_SUMMARY
 
+      # The artifact is the checkout as it stands, so whatever the build needs but the
+      # site does not would be public: templates/ (page sources with placeholders),
+      # scripts/ and node_modules/. No page loads from them. Dot-directories such as
+      # .github/ are already left out by the upload action.
+      - name: Remove build-only files from the Pages artifact
+        working-directory: ave-site
+        run: |
+          rm -rf templates scripts node_modules
+          for d in templates scripts node_modules; do
+            if [ -e "$d" ]; then
+              echo "::error::$d is still in the checkout and would be published"
+              exit 1
+            fi
+          done
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ave-site
-          # exclude node_modules and scripts from the deployed site
-          # (GitHub Pages artifact uses the directory as-is)
+          # the checkout after the previous step: build-only directories are removed
+          # there, since the artifact is the directory as it stands
 
   deploy:
     name: Deploy to GitHub Pages
