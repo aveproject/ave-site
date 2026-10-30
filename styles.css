@@ -579,3 +579,42 @@ a.aveid.primary { font-weight: 700; }
   details.xw > summary h2 { font-size: 17px; }
   details.xw .xw-body { padding: 0 14px 16px; }
 }
+
+/* ---------- Scoring page: figures built from the records (scripts/lib/scoring.js) ---------- */
+.bar { display: inline-block; width: 90px; height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; vertical-align: middle; margin-right: 6px; }
+.bar i { display: block; height: 100%; border-radius: 4px; background: var(--mid); }
+.bar.CRITICAL i, .hist i.b-CRITICAL { background: var(--crit); }
+.bar.HIGH i, .hist i.b-HIGH { background: var(--high); }
+.bar.MEDIUM i, .hist i.b-MEDIUM { background: var(--med); }
+.bar.LOW i, .hist i.b-LOW { background: var(--low); }
+table.ref td.num, table.ref th.num { text-align: right; font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+table.ref th.num { font-size: 11px; }
+.histfig { padding-bottom: 16px; }
+.hist { display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; align-items: end; height: 170px; padding: 0 4px; }
+.hist .col { display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch; height: 100%; text-align: center; font-family: var(--mono); font-size: 12px; }
+.hist .col b { font-weight: 600; color: var(--ink-2); margin-bottom: 3px; }
+.hist .col i { display: block; border-radius: 4px 4px 0 0; min-height: 2px; }
+.hist .col span { color: var(--ink-3); margin-top: 5px; }
+.calc { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px 24px; margin: 22px 0; }
+.calc header { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.calc h3 { margin: 0; font-size: 18px; flex-basis: 100%; }
+.calc ol { list-style: none; margin: 18px 0 0; padding: 0; counter-reset: step; display: grid; gap: 16px; }
+.calc ol > li { counter-increment: step; display: grid; grid-template-columns: 28px 1fr; gap: 12px; margin: 0; }
+.calc ol > li::before { content: counter(step); width: 26px; height: 26px; border-radius: 50%; background: var(--deep); color: #fff; font-family: var(--mono); font-size: 13px; display: grid; place-items: center; }
+.calc .inputs { display: flex; flex-wrap: wrap; gap: 6px 24px; margin: 6px 0 0; font-family: var(--mono); font-size: 13px; }
+.calc .inputs div { display: flex; gap: 8px; }
+.calc .inputs dt { color: var(--ink-3); }
+.calc .inputs dd { margin: 0; font-weight: 600; }
+.calc .factors { list-style: none; margin: 8px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 4px 28px; }
+.calc .factors li { display: grid; grid-template-columns: 1fr 90px 34px; align-items: center; gap: 10px; margin: 0; font-size: 13px; }
+.calc .factors .bar { margin: 0; width: 90px; }
+.calc .factors b { font-family: var(--mono); font-weight: 600; text-align: right; }
+.calc .eq { font-family: var(--mono); font-size: 13px; background: var(--deep); color: #d7ece1; border-radius: 10px; padding: 12px 16px; margin-top: 8px; overflow-x: auto; white-space: nowrap; }
+.calc .eq strong { color: var(--gold); }
+.calc .why { font-size: 14px; color: var(--ink-2); margin: 16px 0 0; padding-top: 14px; border-top: 1px dashed var(--line); }
+.checked { font-size: 13px; color: var(--ink-3); margin-top: 28px; }
+@media (max-width: 720px) {
+  .calc { padding: 18px 16px; }
+  .calc .factors { grid-template-columns: 1fr; }
+  .hist { gap: 4px; }
+}

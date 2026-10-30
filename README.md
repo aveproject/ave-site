@@ -31,7 +31,7 @@ how to use it. If a change is about what AVE says, it belongs in
 | [Registry](https://aveproject.org/registry.html) | Every AVE record, searchable and filterable |
 | [Crosswalks](https://aveproject.org/crosswalks.html) | Mappings from other scanners' categories to AVE ids |
 | [Architecture](https://aveproject.org/architecture.html) | The standard's own structure: records, fixtures, how an implementation consumes them |
-| [Scoring](https://aveproject.org/scoring.html) | AIVSS scoring methodology |
+| [Scoring](https://aveproject.org/scoring.html) | How a record's score is built: the formula, the AARF factors, ThM and Mitigation_Factor, the score distribution and worked examples, generated at build from the ave repo's documents and records |
 | [Schema](https://aveproject.org/schema.html) | Field-by-field reference for the current schema version, generated from the schema at build |
 | [Implementer Guide](https://aveproject.org/implementer-guide.html) | How to use AVE records in a tool, generated from `docs/specs/ave-implementer-guide.md` at build |
 | [Versions](https://aveproject.org/versions.html) | Every catalog release and schema version, and how to pin, verify and use a release offline |
@@ -59,8 +59,8 @@ node scripts/build-records.js
 ## Generated files
 
 `schema/`, `crosswalks/*.json` (including `crosswalks/manifest.json`),
-`records.js`, `site-meta.js`, `schema.html` and `implementer-guide.html` are
-build outputs from [aveproject/ave](https://github.com/aveproject/ave). The
+`records.js`, `site-meta.js`, `schema.html`, `implementer-guide.html` and
+`scoring.html` are build outputs from [aveproject/ave](https://github.com/aveproject/ave). The
 deploy workflow regenerates them on every deploy and they are listed in
 `.gitignore`.
 
@@ -68,18 +68,26 @@ deploy workflow regenerates them on every deploy and they are listed in
   `aveproject/ave` checkout, its `dist/ave-records-latest.manifest.json`, and
   every catalog release with its manifest, read from the GitHub Releases API.
   The footer strip and `versions.html` read it.
-- `schema.html` and `implementer-guide.html` (`scripts/build-pages.js`): the
-  sources are `templates/schema.html` and `templates/implementer-guide.html`,
-  filled from `schema/ave-record.schema.json` and
-  `docs/specs/ave-implementer-guide.md`. Edit the templates for layout; edit
-  `aveproject/ave` for content. The guide is rendered with
-  [marked](https://github.com/markedjs/marked), pinned exactly in
-  `package.json`.
- These
-are build outputs from aveproject/ave; never edit or commit them. A committed
-copy is overwritten at deploy time, so it can only mislead whoever reads it.
-After publishing the schema files the deploy compares each one with
-`aveproject/ave` byte for byte and fails the build on any difference.
+- `schema.html`, `implementer-guide.html` and `scoring.html`
+  (`scripts/build-pages.js`): the sources are `templates/schema.html`,
+  `templates/implementer-guide.html` and `templates/scoring.html`, filled from
+  `schema/ave-record.schema.json`, `docs/specs/ave-implementer-guide.md`, and
+  for scoring `CONTRIBUTING.md`, `README.md`, the schema and `records.js`.
+  Edit the templates for layout; edit `aveproject/ave` for content. The guide
+  is rendered with [marked](https://github.com/markedjs/marked), pinned exactly
+  in `package.json`.
+- `scoring.html` (`scripts/lib/scoring.js`) states nothing about scoring that
+  the ave repo does not: the formula, factor wording, ThM values and severity
+  bands are read from its README and CONTRIBUTING, cross-checked against each
+  other and the schema, and the numbers come from the records. If those
+  documents disagree, the build fails and the previous page stays live. A
+  record whose own numbers disagree with them is a build warning, counted on
+  the page. `npm test` covers this.
+
+Never edit or commit these. A committed copy is overwritten at deploy time, so
+it can only mislead whoever reads it. After publishing the schema files the
+deploy compares each one with `aveproject/ave` byte for byte and fails the
+build on any difference.
 
 The `.md` write-ups in `crosswalks/` are not produced by these scripts. They
 are plain tracked copies, the deploy does not refresh them, and no page links
@@ -98,7 +106,8 @@ npm run build:local        # records.js from ../ave/records
 npm run build:schemas      # schema/ from ../ave/schema
 npm run build:crosswalks   # crosswalks/*.json and manifest.json from ../ave/crosswalks
 npm run build:meta         # site-meta.js (needs network; build:meta:offline lists releases from tags only)
-npm run build:pages        # schema.html and implementer-guide.html from ../ave
+npm run build:pages        # schema.html, implementer-guide.html and scoring.html from ../ave (run build:local first: scoring.html reads records.js)
+npm test                   # the scoring page's tests
 python3 -m http.server 8080
 # or: npx serve .
 ```

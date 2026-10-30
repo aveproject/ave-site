@@ -2,10 +2,12 @@
 /**
  * build-pages.js
  *
- * Generates the two reference pages from aveproject/ave, so they can never
+ * Generates the three reference pages from aveproject/ave, so they can never
  * drift from it:
  *   schema.html             from schema/ave-record.schema.json (the alias, newest version)
  *   implementer-guide.html  from docs/specs/ave-implementer-guide.md
+ *   scoring.html            from CONTRIBUTING.md, README.md, the schema and the records
+ *                           (scripts/lib/scoring.js says which part comes from where)
  *
  * Each page is a template under templates/ (layout, styles, scripts) with
  * placeholders this script fills. The outputs are build artifacts: listed in
@@ -15,14 +17,19 @@
  *   node scripts/build-pages.js
  *   node scripts/build-pages.js --ave-dir ../ave --out-dir .
  *
+ * scoring.html reads records.js, the records the registry shows, so build the
+ * records first (npm run build:local).
+ *
  * Exit codes: 0 success, 1 a source is missing, a placeholder is left unfilled,
- * or the schema has a property this script cannot place (outputs NOT written).
+ * the schema has a property this script cannot place, or the AVE documents
+ * disagree about scoring (outputs NOT written).
  */
 
 const fs = require("fs");
 const path = require("path");
 const { execFileSync } = require("child_process");
 const { Marked } = require("marked");
+const scoring = require("./lib/scoring");
 
 const args = process.argv.slice(2);
 const flag = (name, fallback) => {
@@ -325,6 +332,26 @@ function buildGuidePage(commit) {
   });
 }
 
+// ── scoring.html ──────────────────────────────────────────────────────────────
+
+// The records are the ones the registry shows (records.js), so the two pages count the same set.
+function buildScoringPage(commit) {
+  const recordsPath = path.join(OUT_DIR, "records.js");
+  if (!fs.existsSync(recordsPath)) fail(`${recordsPath} not found; scoring.html is built from the records the registry shows, so run the records build first (npm run build:local)`);
+  let page;
+  try {
+    page = scoring.buildScoring({ ...scoring.loadSources(AVE_DIR), records: require(recordsPath), sha: commit });
+  } catch (e) {
+    fail(e.message);
+  }
+  for (const w of page.warnings) console.log(`::warning::scoring: ${w}`);
+  log(`scoring: ${page.summary.total} records, ${page.warnings.length} disagreeing with the documents`);
+  return fill("scoring.html", {
+    ...page.values,
+    "{{AVE_COMMIT_SHORT}}": commit.slice(0, 7),
+  });
+}
+
 // ── shared ────────────────────────────────────────────────────────────────────
 
 function fill(name, values) {
@@ -339,7 +366,7 @@ function fill(name, values) {
 }
 
 const commit = execFileSync("git", ["-C", AVE_DIR, "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
-const pages = [buildSchemaPage(commit), buildGuidePage(commit)];
+const pages = [buildSchemaPage(commit), buildGuidePage(commit), buildScoringPage(commit)];
 for (const { name, html } of pages) {
   fs.writeFileSync(path.join(OUT_DIR, name), html, "utf8");
   log(`Written: ${path.join(OUT_DIR, name)}`);
