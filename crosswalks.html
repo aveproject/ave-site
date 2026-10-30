@@ -103,6 +103,7 @@
       <a href="scoring.html">Scoring</a>
       <a href="schema.html">Schema</a>
       <a href="implementer-guide.html">Guide</a>
+      <a href="versions.html">Versions</a>
       <a class="gh" href="https://github.com/aveproject/ave" target="_blank">GitHub</a>
     </nav>
   </div>
@@ -117,32 +118,21 @@ different tools become comparable through a shared vocabulary.</p>
   </div>
 </header>
 
-<section class="xw-section" id="dynamic-crosswalks">
+<section class="xw-section" id="crosswalks">
   <div class="wrap">
-    <div id="cw-loading" style="padding:30px 0;color:var(--ink-3);font-family:var(--mono);font-size:13px;">Loading crosswalks&hellip;</div>
-    <div id="cw-error" style="display:none;padding:20px;background:#fff3f0;border:1px solid #e0a89a;border-radius:10px;color:#a33;font-size:14px;"></div>
-    <!-- AST10 renders here: it's the crosswalk that goes first, right
-         before the AVE -> OWASP/MITRE ATLAS table below. -->
-    <div id="cw-mount-primary"></div>
+    <p class="note">Each crosswalk maps another tool's or framework's categories onto AVE records, or AVE's onto theirs. Open one to see its mappings, the notes behind them and the gaps on either side, or search every mapping on the page at once. A link to <code>crosswalks.html#xw-&lt;file name&gt;</code> opens that crosswalk.</p>
+    <div id="cw-loading" class="emptynote" style="padding:20px 0;">Loading crosswalks&hellip;</div>
+    <div id="cw-error" style="display:none;padding:16px 18px;background:#fff3f0;border:1px solid #e0a89a;border-radius:10px;color:#a33;font-size:14px;margin:0 0 16px;"></div>
+    <div class="filterbar">
+      <input type="search" id="cw-filter" placeholder="Search mappings: an AVE id, a category, a rule or any text" aria-label="Search every crosswalk" autocomplete="off">
+      <span id="cw-count" class="count" aria-live="polite"></span>
+      <button type="button" class="clearbtn" id="cw-toggle-all">Expand all</button>
+    </div>
+    <p id="cw-none" class="emptynote" hidden>No mapping matches that search.</p>
+    <div id="cw-mount"></div>
+    <p class="note" style="margin-top:22px;">Maintain a scanner? <a href="implementer-guide.html#map-your-rules-to-ave-ids">Map your rules to AVE ids</a>, or <a href="https://github.com/aveproject/ave/issues/new" target="_blank" rel="noopener">open an issue</a> and the maintainer will help build the crosswalk.</p>
   </div>
 </section>
-
-<section class="xw-section" style="padding-top:0;">
-  <div class="wrap">
-    <h2>AVE &rarr; OWASP &middot; MITRE ATLAS</h2>
-    <p class="note">Every AVE record maps to the frameworks teams already trust. Generated from the record set.</p>
-    <div class="tbl-wrap"><table class="ref">
-      <thead><tr><th>AVE id</th><th>Attack class</th><th>OWASP MCP</th><th>OWASP Agentic</th><th>MITRE ATLAS</th><th>NIST AI RMF</th></tr></thead>
-      <tbody id="fwrows"></tbody>
-    </table></div>
-    <p class="note" style="margin-top:18px;">Maintain a scanner? <a href="architecture.html">Map your finding types to AVE &rarr;</a></p>
-  </div>
-</section>
-
-<!-- SkillSpector, ClawScan, any newly-added full-detail crosswalk, and
-     the "More crosswalks" one-liners render here, after the framework
-     table above. -->
-<div id="cw-mount-secondary"></div>
 
 <footer class="site">
   <div class="wrap">
@@ -159,7 +149,8 @@ different tools become comparable through a shared vocabulary.</p>
           <a href="crosswalks.html">Crosswalks</a>
           <a href="architecture.html">Architecture</a>
           <a href="scoring.html">Scoring</a>
-          <a href="schema.html">Schema v1.0.0</a>
+          <a href="schema.html">Schema</a>
+          <a href="versions.html">Versions</a>
           <a href="implementer-guide.html">Implementer Guide</a>
           <a href="https://github.com/aveproject/ave" target="_blank">GitHub repo</a>
           <a href="https://api.aveproject.org" target="_blank">API</a>
@@ -174,309 +165,266 @@ different tools become comparable through a shared vocabulary.</p>
     <div class="base">
       <span>&copy; 2026 AVE Project</span>
       <span>Apache 2.0</span>
+      <span class="verstrip" data-ave-version="versions.html"></span>
     </div>
   </div>
 </footer>
+<script src="records.js"></script>
 <script>
 (function () {
-  var SEV_COLOR = { Critical: "#b3261e", High: "#c98a3a", Medium: "#5d6f66", Low: "#5d6f66" };
+  // Renders every crosswalk in crosswalks/manifest.json (published from
+  // aveproject/ave at build) as a collapsible section, plus one built from the
+  // record set itself, with a directory, deep links (#xw-<file>) and one search
+  // over every table. Crosswalk files share an envelope (crosswalk-1.0.0.schema.json)
+  // but each names its mapping keys its own way, so labels are found by shape,
+  // not by a per-file list: the first key that is not a known AVE-side or
+  // annotation key is the other side's label.
+  var REPO_FILE = "https://github.com/aveproject/ave/blob/main/crosswalks/";
+  var NOT_A_LABEL = ["ave_id", "ave_ids", "primary_ave_id", "title", "description", "notes", "note", "gap",
+    "rules", "sub_case", "ave_field", "ave_values", "evidence", "match_type", "relationship", "ast_severity",
+    "ast_description", "aix_permalink", "registry_section", "registry_values"];
 
-  // These crosswalks have grown real depth (sub-cases, per-mapping notes,
-  // documented gaps) -- rendering their full mapping table on this page
-  // turns useful detail into an unreadable wall of text. They're listed
-  // as a one-line mention + GitHub link at the bottom instead. This is a
-  // deliberate editorial call, not something derivable from file size or
-  // mapping count (cfgaudit's note is shorter than SkillSpector's, for
-  // example), so it's a plain list here rather than a computed threshold.
-  var MINIMAL_CROSSWALKS = [
-    "cfgaudit-to-ave.json",
-    "nova-proximity-to-ave.json",
-    "ramparts-to-ave.json"
-  ];
-
-  // Display order for the full-detail crosswalks. AST10 renders on its own,
-  // ahead of the static "AVE -> OWASP/MITRE ATLAS" table elsewhere on this
-  // page; everything else in SECONDARY_ORDER renders after that table.
-  // A crosswalk that's neither here nor in MINIMAL_CROSSWALKS (a newly
-  // added one, not yet triaged into either list) still renders in full,
-  // appended after the ones named below -- it never silently disappears
-  // for want of an entry in this list, only its position is unplaced.
-  var PRIMARY_CROSSWALK = "ave-to-ast10.json";
-  var SECONDARY_ORDER = ["skillspector-to-ave.json", "clawscan-to-ave.json"];
-
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
-
-  function chipList(ids) {
-    if (!ids || !ids.length) return '<span class="aveid">&mdash; (not an AVE behavioral class)</span>';
-    return '<span class="aveid">' + ids.map(escapeHtml).join(", ") + "</span>";
+  // Escaped text with every AVE id in it linked to its registry entry.
+  function linkIds(text) {
+    return esc(text).replace(/AVE-\d{4}-\d{5}/g, function (id) {
+      return '<a class="aveid" href="registry.html#' + id + '">' + id + "</a>";
+    });
+  }
+  function joined(v) { return v == null ? "" : Array.isArray(v) ? v.join(", ") : String(v); }
+  function labelKeys(m) {
+    return Object.keys(m).filter(function (k) {
+      return NOT_A_LABEL.indexOf(k) === -1 && (typeof m[k] === "string" || Array.isArray(m[k]));
+    });
+  }
+  function idLinks(ids, primary) {
+    if (!ids || !ids.length) return '<span class="nomatch">No AVE record (a gap)</span>';
+    return '<span class="idlist">' + ids.map(function (id) {
+      return '<a class="aveid' + (id === primary && ids.length > 1 ? ' primary" title="Primary record' : "") +
+        '" href="registry.html#' + esc(id) + '">' + esc(id) + "</a>";
+    }).join("") + "</span>";
+  }
+  function tag(text, cls) { return text ? ' <span class="tagline ' + esc(cls || text) + '">' + esc(text) + "</span>" : ""; }
+  function note(text) {
+    return text ? '<details class="rownote"><summary>Notes</summary><p>' + linkIds(text) + "</p></details>" : "";
   }
 
-  // Find the first key on an object whose name ends with one of the given suffixes.
-  // Used so each renderer can find the "category label" field regardless of which
-  // source-specific key name a crosswalk file uses (skillspector_category,
-  // clawscan_module, ast_id, etc.) without hardcoding every possible name.
-  function firstKeyEndingWith(obj, suffixes) {
-    for (var i = 0; i < suffixes.length; i++) {
-      for (var k in obj) {
-        if (k.toLowerCase().indexOf(suffixes[i]) !== -1) return obj[k];
-      }
-    }
-    return undefined;
-  }
-
-  // A source-side value found via firstKeyEndingWith may be a single string
-  // (skillspector_category, semia_label) or an array (sss_rules,
-  // skillsentry_rules -- several source rule ids can map to one AVE id).
-  // Render either the same way rather than letting an array print as
-  // "[object Object]" or get silently dropped.
-  function joinLabel(v) {
-    if (v == null) return null;
-    return Array.isArray(v) ? v.join(", ") : String(v);
-  }
-
-  // Renders a flat "source tool -> AVE" crosswalk (SkillSpector-shaped).
-  // Mappings are flat objects with a *_category / *_module key, ave_ids[], notes.
-  function renderFlatSourceToAve(data) {
-    var toolName = data.source.tool;
-    var title = escapeHtml(toolName) + " &rarr; AVE";
-    // Full width, not the site-wide .note cap: these crosswalk notes run
-    // long (600-1600 chars) and read badly squeezed into a 760px column
-    // when the section around them is much wider.
-    var sub = data.note ? "<p class=\"note\" style=\"max-width:100%;\">" + escapeHtml(data.note) + "</p>" : "";
-    var rows = data.mappings.map(function (m) {
-      // "category"/"module" cover SkillSpector-shaped files; "label"/"rules"
-      // cover Semia's semia_label and skill-security-scanner/skillsentry's
-      // *_rules arrays -- three more source-rule-id-shaped key names this
-      // crosswalk shape uses that the original suffix list didn't include.
-      var cat = joinLabel(firstKeyEndingWith(m, ["category", "module", "label", "rules"]));
-      var catHtml = escapeHtml(cat != null ? cat : "(uncategorised)");
-      if (m.gap) catHtml += ' <span style="color:var(--ink-3);font-size:11px;">&mdash; gap: ' + escapeHtml(m.gap) + "</span>";
-      // ave_ids[] (SkillSpector) or a single ave_id (Semia, skill-security-scanner,
-      // skillsentry -- one AVE record, one or more source rules mapping onto it).
-      var ids = m.ave_ids || (m.ave_id ? [m.ave_id] : []);
-      return "<tr><td class=\"mono\">" + catHtml + "</td><td>" + chipList(ids) + "</td></tr>";
-    }).join("\n");
-
-    return (
-      '<section class="xw-section" style="padding-top:0;"><div class="wrap">' +
-      "<h2>" + title + "</h2>" + sub +
-      '<div class="tbl-wrap"><table class="ref"><thead><tr><th>' +
-      escapeHtml(toolName) + ' category</th><th>AVE id(s)</th></tr></thead><tbody>' +
-      rows + "</tbody></table></div></div></section>"
-    );
-  }
-
-  // Renders a nested "source tool -> AVE" crosswalk (ClawScan-shaped): each mapping
-  // is a module containing a rules[] array, each rule carrying its own ave_ids[].
-  function renderNestedSourceToAve(data) {
-    var toolName = data.source.tool;
-    var title = escapeHtml(toolName) + " &rarr; AVE";
-    // Full width, not the site-wide .note cap: these crosswalk notes run
-    // long (600-1600 chars) and read badly squeezed into a 760px column
-    // when the section around them is much wider.
-    var sub = data.note ? "<p class=\"note\" style=\"max-width:100%;\">" + escapeHtml(data.note) + "</p>" : "";
+  // One row per mapping: { label, sub, tags, ave (html), ids[], notes, gap }
+  function rowsOf(data) {
     var rows = [];
-    data.mappings.forEach(function (m) {
-      var moduleName = firstKeyEndingWith(m, ["module", "category"]) || "(module)";
-      (m.rules || []).forEach(function (r) {
-        var ruleLabel = escapeHtml(r.rule_id || moduleName);
-        if (r.gap) ruleLabel += ' <span style="color:var(--ink-3);font-size:11px;">&mdash; gap: ' + escapeHtml(r.gap) + "</span>";
-        rows.push("<tr><td class=\"mono\">" + ruleLabel + "</td><td>" + chipList(r.ave_ids) + "</td></tr>");
+    var toAve = !!(data.source && data.source.tool);
+    (data.mappings || []).forEach(function (m) {
+      if (toAve && m.rules) {
+        var module = joined(m[labelKeys(m)[0]]);
+        m.rules.forEach(function (r) {
+          var ids = r.ave_ids || (r.ave_id ? [r.ave_id] : []);
+          rows.push({ label: r.rule_id || module, sub: (r.rule_id ? module + ": " : "") + (r.description || ""),
+            ids: ids, ave: idLinks(ids, r.primary_ave_id), notes: r.notes || r.note, gap: r.gap });
+        });
+        return;
+      }
+      var keys = labelKeys(m);
+      if (m.ave_field) {
+        var fields = [].concat(m.ave_field);
+        rows.push({ label: joined(m[keys[0]]), sub: m.registry_section || "",
+          tags: tag(m.match_type, "match") + tag(m.evidence, "evidence"),
+          ids: [], ave: fields.map(function (f) {
+            return '<a class="aveid" href="schema.html#field-' + esc(f) + '">' + esc(f) + "</a>";
+          }).join(" ") + (m.ave_values ? '<div class="nomatch">' + esc(joined(m.ave_values)) + "</div>" : ""),
+          notes: m.notes || m.note, gap: m.gap });
+        return;
+      }
+      var ids = m.ave_ids || (m.ave_id ? [m.ave_id] : []);
+      var label = joined(m[keys[0]]);
+      var sub = toAve ? (m.sub_case || m.description || "") : joined(m[keys[1]]);
+      rows.push({
+        label: m.aix_permalink ? '<a href="' + esc(m.aix_permalink) + '" target="_blank" rel="noopener">' + esc(label) + "</a>" : esc(label),
+        rawLabel: true, sub: sub,
+        tags: tag(m.ast_severity) + tag(m.relationship, "relationship"),
+        ids: ids, ave: idLinks(ids, m.primary_ave_id) + (toAve && m.title ? '<div class="nomatch">' + esc(m.title) + "</div>" : ""),
+        notes: m.notes || m.note, gap: m.gap,
       });
     });
-
-    return (
-      '<section class="xw-section" style="padding-top:0;"><div class="wrap">' +
-      "<h2>" + title + "</h2>" + sub +
-      '<div class="tbl-wrap"><table class="ref"><thead><tr><th>' +
-      escapeHtml(toolName) + ' rule</th><th>AVE id(s)</th></tr></thead><tbody>' +
-      rows.join("\n") + "</tbody></table></div></div></section>"
-    );
+    return rows;
   }
 
-  // "AVE -> target framework" crosswalks each name their own pair of label
-  // fields (a primary id/layer and a secondary title/threat) -- crosswalk-
-  // 1.0.0.schema.json deliberately leaves per-crosswalk mapping keys
-  // unconstrained. Declared explicitly per file rather than guessed via a
-  // suffix search: MAESTRO's ave_ids/primary_ave_id fields both contain
-  // "id" as a substring, so a generic "ends with _id" search would match
-  // the wrong field (an array of AVE ids, not the MAESTRO layer name).
-  // AST10 stays the default so a crosswalk not listed here still renders
-  // using the original field names rather than breaking.
-  var AVE_TO_TARGET_LABEL_KEYS = {
-    "ave-to-ast10.json": ["ast_id", "ast_title"],
-    "ave-to-maestro.json": ["maestro_layer", "maestro_threat"]
-  };
-
-  // Renders an "AVE -> target framework" crosswalk with per-category severity (AST10, ...).
-  // Expected shape: { target: {tool, ...}, mappings: [{<id-key>, <title-key>, ast_severity?, ave_ids[]}], coverage? }
-  function renderAveToTarget(data, file) {
-    var title = "AVE &rarr; " + escapeHtml(data.target.tool || data.target.standard || "Target");
-    // Full width, not the site-wide .note cap: these crosswalk notes run
-    // long (600-1600 chars) and read badly squeezed into a 760px column
-    // when the section around them is much wider.
-    var sub = data.note ? "<p class=\"note\" style=\"max-width:100%;\">" + escapeHtml(data.note) + "</p>" : "";
-    var keys = AVE_TO_TARGET_LABEL_KEYS[file] || ["ast_id", "ast_title"];
-    var idKey = keys[0], titleKey = keys[1];
-    var rows = data.mappings.map(function (m) {
-      var idPart = m[idKey] != null ? m[idKey] : (m.ast_id || m.id);
-      var titlePart = m[titleKey] != null ? m[titleKey] : (m.ast_title || m.title);
-      var label = escapeHtml(idPart != null ? idPart : "") + " &mdash; " + escapeHtml(titlePart != null ? titlePart : "");
-      var sevBadge = "";
-      if (m.ast_severity) {
-        var color = SEV_COLOR[m.ast_severity] || "#5d6f66";
-        sevBadge =
-          ' <span style="font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:' +
-          color + ";border:1px solid " + color +
-          ';border-radius:5px;padding:1px 6px;margin-left:8px;">' +
-          escapeHtml(m.ast_severity).toUpperCase() + "</span>";
-      }
-      return "<tr><td class=\"mono\">" + label + sevBadge + "</td><td>" + chipList(m.ave_ids) + "</td></tr>";
-    }).join("\n");
-
-    return (
-      '<section class="xw-section" style="padding-top:0;"><div class="wrap">' +
-      "<h2>" + title + "</h2>" + sub +
-      '<div class="tbl-wrap"><table class="ref"><thead><tr><th>' +
-      (data.target.tool || "Target") + ' category</th><th>AVE id(s)</th></tr></thead><tbody>' +
-      rows + "</tbody></table></div></div></section>"
-    );
+  function gapLists(data, name) {
+    var out = [];
+    Object.keys(data).forEach(function (k) {
+      if (k.indexOf("gaps") !== 0 || !Array.isArray(data[k]) || !data[k].length) return;
+      var title = k === "gaps_in_ave" ? "Not covered by AVE" : k === "gaps" ? "Gaps" : "Not covered by " + name;
+      out.push('<details class="about"><summary>' + esc(title) + " (" + data[k].length + ')</summary><ul class="gaplist">' +
+        data[k].map(function (g) {
+          var what = g.ave_id ? linkIds(g.ave_id)
+            : "<strong>" + esc(g.topic || g.ast_id || g.registry_term || g.side || "") + "</strong>";
+          return "<li>" + what + (g.reason ? ": " + linkIds(g.reason) : "") + "</li>";
+        }).join("") + "</ul></details>");
+    });
+    return out.join("");
   }
 
-  // One-line mention for a crosswalk that's too detailed to render in full
-  // here: tool name and a direct link to the real file on GitHub.
-  function renderMinimalEntry(data, file) {
-    var toolName = (data.source && data.source.tool) || file.replace(/\.json$/, "");
-    var githubUrl = "https://github.com/aveproject/ave/blob/main/crosswalks/" + encodeURIComponent(file);
-    return (
-      '<p class="note">' + escapeHtml(toolName) + " &rarr; AVE &mdash; " +
-      '<a href="' + githubUrl + '" target="_blank">View full crosswalk on GitHub &rarr;</a></p>'
-    );
+  function section(cw) {
+    var head = "<tr><th>" + esc(cw.leftHead) + "</th><th>" + esc(cw.rightHead) + "</th></tr>";
+    var body = cw.rows.map(function (r) {
+      var left = (r.rawLabel ? r.label : esc(r.label)) + (r.tags || "") +
+        (r.sub ? '<div class="nomatch">' + esc(r.sub) + "</div>" : "") +
+        (r.gap ? '<div class="nomatch">Gap: ' + esc(r.gap) + "</div>" : "") + note(r.notes);
+      return '<tr><td class="mono">' + left + '</td><td data-label="' + esc(cw.rightHead) + '">' + r.ave + "</td></tr>";
+    }).join("");
+    var links = cw.links.map(function (l) { return '<a href="' + esc(l[1]) + '" target="_blank" rel="noopener">' + esc(l[0]) + "</a>"; }).join("");
+    var about = cw.about.length ? '<details class="about"><summary>About this crosswalk</summary>' +
+      cw.about.map(function (p) { return "<p>" + linkIds(p) + "</p>"; }).join("") + "</details>" : "";
+    return '<details class="xw" id="' + esc(cw.id) + '"><summary><h2>' + cw.title + '</h2><span class="meta">' + cw.meta.map(function (m) { return '<span class="nw">' + esc(m) + "</span>"; }).join(" · ") +
+      '</span><span class="xw-tag">' + esc(cw.kind) + '</span></summary><div class="xw-body">' +
+      (links ? '<div class="xw-links">' + links + "</div>" : "") + about +
+      '<div class="tbl-wrap"><table class="ref stack-sm"><thead>' + head + "</thead><tbody>" + body + "</tbody></table></div>" +
+      (cw.gaps || "") + (cw.coverage ? '<p class="nomatch" style="margin-top:12px;">' + esc(cw.coverage) + "</p>" : "") +
+      "</div></details>";
   }
 
-  function renderCrosswalk(data, file) {
-    // A "source -> AVE" crosswalk has data.source.tool. Two known shapes exist:
-    //  - flat: mappings[] are leaf objects with their own ave_ids[] (SkillSpector,
-    //    Semia, skill-security-scanner, skillsentry)
-    //  - nested: mappings[] are modules containing rules[], each with ave_ids[] (ClawScan)
-    // An "AVE -> target" crosswalk has data.target instead (AST10, MAESTRO).
-    if (data.source && data.source.tool && data.mappings && data.mappings.length) {
-      var first = data.mappings[0];
-      if (first.rules) return renderNestedSourceToAve(data);
-      return renderFlatSourceToAve(data);
+  function fromFile(file, data) {
+    var toAve = !!(data.source && data.source.tool);
+    var t = data.target || {};
+    var name = toAve ? data.source.tool : (t.tool || t.registry || t.standard || file.replace(/\.json$/, ""));
+    var rows = rowsOf(data);
+    var ids = {};
+    rows.forEach(function (r) { r.ids.forEach(function (id) { ids[id] = 1; }); });
+    var fieldLevel = (data.mappings || []).some(function (m) { return m.ave_field; });
+    var coverage = data.coverage && typeof data.coverage === "object"
+      ? Object.keys(data.coverage).filter(function (k) { return typeof data.coverage[k] === "number"; })
+          .map(function (k) { return k.replace(/_/g, " ") + ": " + data.coverage[k]; }).join(" · ")
+      : "";
+    var site = toAve ? (data.source.site || data.source.url) : (t.url || t.github);
+    return {
+      id: "xw-" + file.replace(/\.json$/, ""), file: file, name: name, toAve: toAve,
+      title: toAve ? esc(name) + " &rarr; AVE" : "AVE &rarr; " + esc(name),
+      kind: toAve ? "Tool → AVE" : fieldLevel ? "AVE → vocabulary" : "AVE → framework",
+      leftHead: toAve ? name + " rule or category" : name + (fieldLevel ? " term" : " category"),
+      rightHead: fieldLevel ? "AVE field" : "AVE record(s)",
+      rows: rows,
+      meta: [rows.length + " mapping" + (rows.length === 1 ? "" : "s"),
+        fieldLevel ? null : Object.keys(ids).length + " AVE record" + (Object.keys(ids).length === 1 ? "" : "s"),
+        data.generated || null].filter(Boolean),
+      about: [data.note, data.revision_note].filter(Boolean),
+      links: [[name + " site", site], ["Crosswalk file on GitHub", REPO_FILE + encodeURIComponent(file)]].filter(function (l) { return l[1]; }),
+      gaps: gapLists(data, name),
+      coverage: coverage,
+    };
+  }
+
+  // The record set's own framework fields, as one more crosswalk.
+  function fromRecords(records) {
+    var j = function (a) { return a && a.length ? a.join(", ") : ""; };
+    var rows = records.slice().sort(function (a, b) { return a.ave_id < b.ave_id ? -1 : 1; }).map(function (r) {
+      var maps = [["MCP", r.owasp_mcp], ["ASI", r.owasp_asi], ["ATLAS", r.mitre_atlas], ["NIST", r.nist_ai_rmf]]
+        .filter(function (p) { return p[1] && p[1].length; })
+        .map(function (p) { return '<span class="tagline" style="margin:0 6px 0 0">' + p[0] + "</span>" + esc(j(p[1])); }).join("<br>");
+      return { label: '<a class="aveid" href="registry.html#' + esc(r.ave_id) + '">' + esc(r.ave_id) + "</a>", rawLabel: true,
+        sub: r.title, ids: [r.ave_id], ave: '<span class="mono" style="font-size:13px">' + maps + "</span>" };
+    });
+    return {
+      id: "xw-frameworks", file: null, name: "OWASP MCP, OWASP Agentic, MITRE ATLAS, NIST AI RMF", toAve: false,
+      title: "AVE &rarr; OWASP &middot; MITRE ATLAS &middot; NIST AI RMF", kind: "From every record",
+      leftHead: "AVE record", rightHead: "Framework mappings", rows: rows,
+      meta: [rows.length + " records", "from the record set on this site"],
+      about: ["Every AVE record maps itself to the frameworks security teams already use: owasp_mcp on every published record, owasp_asi, mitre_atlas and nist_ai_rmf where they apply. This table is built from the records, not from a crosswalk file."],
+      links: [], gaps: "", coverage: "",
+    };
+  }
+
+
+  function openFromHash() {
+    var id = decodeURIComponent(location.hash.slice(1));
+    var el = id && document.getElementById(id);
+    if (el && el.tagName === "DETAILS") { el.open = true; el.scrollIntoView({ block: "start" }); }
+  }
+
+  function wireFilter(all) {
+    var input = document.getElementById("cw-filter");
+    var count = document.getElementById("cw-count");
+    var none = document.getElementById("cw-none");
+    var toggle = document.getElementById("cw-toggle-all");
+    var sections = Array.prototype.slice.call(document.querySelectorAll("details.xw"));
+    var total = sections.reduce(function (n, s) { return n + s.querySelectorAll("tbody tr").length; }, 0);
+    function apply() {
+      var q = input.value.trim().toLowerCase();
+      var shown = 0, hit = 0;
+      sections.forEach(function (s) {
+        var nameHit = q && s.querySelector("summary").textContent.toLowerCase().indexOf(q) !== -1;
+        var n = 0;
+        s.querySelectorAll("tbody tr").forEach(function (tr) {
+          var show = !q || nameHit || tr.textContent.toLowerCase().indexOf(q) !== -1;
+          tr.hidden = !show;
+          if (show) n++;
+        });
+        s.hidden = q !== "" && n === 0;
+        if (q && n) { s.open = true; hit++; }
+        shown += n;
+      });
+      count.textContent = q ? shown + " of " + total + " mappings in " + hit + " crosswalk" + (hit === 1 ? "" : "s")
+        : sections.length + " crosswalks · " + total + " mappings";
+      none.hidden = !q || shown !== 0;
     }
-    return renderAveToTarget(data, file);
+    input.addEventListener("input", apply);
+    toggle.addEventListener("click", function () {
+      var open = toggle.textContent === "Expand all";
+      sections.forEach(function (s) { if (!s.hidden) s.open = open; });
+      toggle.textContent = open ? "Collapse all" : "Expand all";
+    });
+    apply();
   }
 
-  async function loadCrosswalks() {
-    var loadingEl = document.getElementById("cw-loading");
-    var errorEl = document.getElementById("cw-error");
-    var primaryMountEl = document.getElementById("cw-mount-primary");
-    var secondaryMountEl = document.getElementById("cw-mount-secondary");
-
+  async function load() {
+    var loading = document.getElementById("cw-loading");
+    var error = document.getElementById("cw-error");
+    var list = [];
+    var failures = [];
     try {
-      var manifestRes = await fetch("crosswalks/manifest.json");
-      if (!manifestRes.ok) throw new Error("manifest.json " + manifestRes.status);
-      var manifest = await manifestRes.json();
-
-      var dataByFile = {};
-      var failures = [];
-
+      var res = await fetch("crosswalks/manifest.json");
+      if (!res.ok) throw new Error("manifest.json " + res.status);
+      var manifest = await res.json();
       for (var i = 0; i < manifest.files.length; i++) {
         var file = manifest.files[i];
         try {
-          var res = await fetch("crosswalks/" + file);
-          if (!res.ok) throw new Error(res.status);
-          dataByFile[file] = await res.json();
+          var r = await fetch("crosswalks/" + file);
+          if (!r.ok) throw new Error(r.status);
+          list.push(fromFile(file, await r.json()));
         } catch (e) {
           failures.push(file);
         }
       }
-
-      var primaryParts = [];
-      var secondaryParts = [];
-      var minimalParts = [];
-      var placed = {};
-
-      if (dataByFile[PRIMARY_CROSSWALK]) {
-        primaryParts.push(renderCrosswalk(dataByFile[PRIMARY_CROSSWALK], PRIMARY_CROSSWALK));
-        placed[PRIMARY_CROSSWALK] = true;
-      }
-
-      SECONDARY_ORDER.forEach(function (file) {
-        if (dataByFile[file]) {
-          secondaryParts.push(renderCrosswalk(dataByFile[file], file));
-          placed[file] = true;
-        }
-      });
-
-      // Anything fetched successfully but not yet named above or in
-      // MINIMAL_CROSSWALKS: still render it in full, just appended after
-      // the explicitly-ordered ones, so a new crosswalk never silently
-      // disappears for want of a triage decision.
-      manifest.files.forEach(function (file) {
-        if (placed[file] || MINIMAL_CROSSWALKS.indexOf(file) !== -1) return;
-        if (dataByFile[file]) {
-          secondaryParts.push(renderCrosswalk(dataByFile[file], file));
-          placed[file] = true;
-        }
-      });
-
-      MINIMAL_CROSSWALKS.forEach(function (file) {
-        if (dataByFile[file]) minimalParts.push(renderMinimalEntry(dataByFile[file], file));
-      });
-
-      if (minimalParts.length) {
-        secondaryParts.push(
-          '<section class="xw-section" style="padding-top:0;"><div class="wrap">' +
-          "<h2>More crosswalks</h2>" +
-          minimalParts.join("\n") +
-          "</div></section>"
-        );
-      }
-
-      loadingEl.style.display = "none";
-      primaryMountEl.innerHTML = primaryParts.join("\n");
-      secondaryMountEl.innerHTML = secondaryParts.join("\n");
-
-      if (failures.length) {
-        errorEl.style.display = "block";
-        errorEl.textContent =
-          "Could not load: " + failures.join(", ") +
-          ". Other crosswalks loaded normally.";
-      }
     } catch (e) {
-      loadingEl.style.display = "none";
-      errorEl.style.display = "block";
-      errorEl.textContent =
-        "Crosswalks could not be loaded (" + e.message + "). " +
-        "If you are running this locally, serve the site over HTTP " +
-        "(e.g. npx serve .) rather than opening the file directly \u2014 " +
-        "fetch() requires a server, not file://.";
+      failures.push("manifest.json (" + e.message + ")");
     }
+    // AVE-to-framework first, then tools, each alphabetical
+    list.sort(function (a, b) {
+      return (a.toAve - b.toAve) || a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+    });
+    if (window.RECORDS && window.RECORDS.length) list.unshift(fromRecords(window.RECORDS));
+    loading.style.display = "none";
+    var frameworks = list.filter(function (cw) { return !cw.toAve; });
+    var tools = list.filter(function (cw) { return cw.toAve; });
+    document.getElementById("cw-mount").innerHTML =
+      (frameworks.length ? '<h3 class="xw-group">Frameworks and vocabularies <span>AVE records mapped onto their categories</span></h3>' + frameworks.map(section).join("") : "") +
+      (tools.length ? '<h3 class="xw-group">Scanners and tools <span>their rules and categories mapped onto AVE records</span></h3>' + tools.map(section).join("") : "");
+    if (failures.length) {
+      error.style.display = "block";
+      error.textContent = "Could not load: " + failures.join(", ") + ". " +
+        (location.protocol === "file:" ? "Serve the site over HTTP (python3 -m http.server); fetch() does not work from file://." : "Everything else loaded normally.");
+    }
+    wireFilter(list);
+    openFromHash();
+    window.addEventListener("hashchange", openFromHash);
   }
 
-  loadCrosswalks();
+  load();
 })();
 </script>
-<script src="records.js"></script>
-<script>
-const tb = document.getElementById('fwrows');
-window.RECORDS.forEach(r=>{
-  if(!r.severity && r.aivss && r.aivss.aivss_severity) r.severity=r.aivss.aivss_severity;
-  if(!r.aivss_score && r.aivss) r.aivss_score=r.aivss.aivss_score;
-  if(!r.detection_layer) r.detection_layer='content';
-});
-window.RECORDS.slice().sort((a,b)=>a.ave_id<b.ave_id?-1:1).forEach(r=>{
-  const tr=document.createElement('tr');
-  const j=a=>(a&&a.length)?a.join(', '):'\u2014';
-  tr.innerHTML=`<td><span class="aveid">${r.ave_id}</span></td><td class="mono">${r.attack_class}</td><td class="mono">${j(r.owasp_mcp)}</td><td class="mono">${j(r.owasp_asi)}</td><td class="mono">${j(r.mitre_atlas)}</td><td class="mono">${j(r.nist_ai_rmf)}</td>`;
-  tb.appendChild(tr);
-});
-</script>
+<script src="site-meta.js"></script>
+<script src="version-strip.js"></script>
 </body>
 </html>

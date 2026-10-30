@@ -103,6 +103,7 @@
       <a href="scoring.html">Scoring</a>
       <a href="schema.html">Schema</a>
       <a href="implementer-guide.html">Guide</a>
+      <a href="versions.html">Versions</a>
       <a class="gh" href="https://github.com/aveproject/ave" target="_blank">GitHub</a>
     </nav>
   </div>
@@ -151,7 +152,7 @@ behavioral classes, not product-specific instances. Reference implementation:
         <span class="go">See the formula &rarr;</span>
       </a>
       <a class="route" href="schema.html">
-        <span class="k">Reference</span><h3>Schema v1.0.0</h3>
+        <span class="k">Reference</span><h3>Schema</h3>
         <p>Every field, its type, whether it is required, and what it means, plus the evidence declarations and an example record.</p>
         <span class="go">Open the schema &rarr;</span>
       </a>
@@ -188,7 +189,8 @@ behavioral classes, not product-specific instances. Reference implementation:
           <a href="crosswalks.html">Crosswalks</a>
           <a href="architecture.html">Architecture</a>
           <a href="scoring.html">Scoring</a>
-          <a href="schema.html">Schema v1.0.0</a>
+          <a href="schema.html">Schema</a>
+          <a href="versions.html">Versions</a>
           <a href="implementer-guide.html">Implementer Guide</a>
           <a href="https://github.com/aveproject/ave" target="_blank">GitHub repo</a>
           <a href="https://api.aveproject.org" target="_blank">API</a>
@@ -203,6 +205,7 @@ behavioral classes, not product-specific instances. Reference implementation:
     <div class="base">
       <span>&copy; 2026 AVE Project</span>
       <span>Apache 2.0</span>
+      <span class="verstrip" data-ave-version="versions.html"></span>
     </div>
   </div>
 </footer>
@@ -214,5 +217,7 @@ document.getElementById("stat-schema").textContent =
     ? window.RECORDS[0].schema_version.split(".").slice(0, 2).join(".")
     : "1.1";
 </script>
+<script src="site-meta.js"></script>
+<script src="version-strip.js"></script>
 </body>
 </html>
