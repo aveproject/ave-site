@@ -120,8 +120,8 @@ frameworks security teams already report against.</p>
 behavioral classes, not product-specific instances. Reference implementation:
 <a href="https://github.com/bawbel/scanner" style="color:var(--nmono);" target="_blank">Bawbel scanner</a>. <a href="architecture.html" style="color:var(--gold);"> Build your own →</a></p>
     <div class="stats">
-      <div class="stat"><div class="n" id="stat-count">12</div><div class="l">Records</div></div>
-      <div class="stat"><div class="n" id="stat-schema">1.1</div><div class="l">Schema</div></div>
+      <div class="stat"><div class="n" id="stat-count">&ndash;</div><div class="l">Records</div></div>
+      <div class="stat"><div class="n" id="stat-schema">&ndash;</div><div class="l">Schema</div></div>
       <div class="stat"><div class="n">4</div><div class="l">Frameworks mapped</div></div>
       <div class="stat"><div class="n">0.8</div><div class="l">AIVSS spec</div></div>
     </div>
@@ -209,15 +209,16 @@ behavioral classes, not product-specific instances. Reference implementation:
     </div>
   </div>
 </footer>
-<script src="records.js"></script>
-<script>
-document.getElementById("stat-count").textContent = window.RECORDS.length;
-document.getElementById("stat-schema").textContent =
-  (window.RECORDS[0] && window.RECORDS[0].schema_version)
-    ? window.RECORDS[0].schema_version.split(".").slice(0, 2).join(".")
-    : "1.1";
-</script>
 <script src="site-meta.js"></script>
+<script>
+// The counts come from site-meta.js (scripts/build-site-meta.js), not from loading every record.
+(function () {
+  var meta = window.AVE_SITE_META;
+  if (!meta) return;
+  document.getElementById("stat-count").textContent = meta.latest.record_count;
+  document.getElementById("stat-schema").textContent = meta.latest.schema_version;
+})();
+</script>
 <script src="version-strip.js"></script>
 </body>
 </html>

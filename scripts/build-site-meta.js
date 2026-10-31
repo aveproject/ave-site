@@ -6,6 +6,8 @@
  * Every page's version strip and versions.html read it at runtime.
  *
  * Sources, all from the aveproject/ave checkout or its releases:
+ *   - dist/ave-records-latest.json: the counts the home and architecture pages show
+ *     (records per detection layer, status and severity)
  *   - the newest v* tag of the checkout (deploy.yml fetches tags)
  *   - dist/ave-records-latest.manifest.json: schema_version, record_count,
  *     sha256 and generated_at of the records this build publishes
@@ -26,6 +28,7 @@
 const fs = require("fs");
 const path = require("path");
 const { execFileSync } = require("child_process");
+const { recordStats } = require("./lib/stats");
 
 const args = process.argv.slice(2);
 const flag = (name, fallback) => {
@@ -143,6 +146,13 @@ async function main() {
     console.log(`::warning::dist/ave-records-latest.manifest.json says ${latest.record_count} records, records/ holds ${published} non-draft records`);
   }
 
+  const recordsPath = path.join(AVE_DIR, "dist/ave-records-latest.json");
+  if (!fs.existsSync(recordsPath)) fail(`not found: ${recordsPath}`);
+  const stats = recordStats(JSON.parse(fs.readFileSync(recordsPath, "utf8")));
+  if (stats.total !== latest.record_count) {
+    console.log(`::warning::dist/ave-records-latest.json holds ${stats.total} records, its manifest says ${latest.record_count}`);
+  }
+
   const tags = releaseTags();
   let list = null;
   if (OFFLINE) {
@@ -176,6 +186,7 @@ async function main() {
     releases: list || tags.map((t) => ({ tag: t.tag, published_at: t.date, url: `https://github.com/${REPO}/releases/tag/${t.tag}`, pinnable: null, manifest: null, assets: [] })),
     releases_offline: OFFLINE,
     schemas: schemaVersions(),
+    stats,
   };
 
   const output = [
