@@ -17,7 +17,7 @@
     "build:meta:offline": "node scripts/build-site-meta.js --ave-dir ../ave --offline",
     "build:pages": "node scripts/build-pages.js --ave-dir ../ave",
     "build:site": "npm run build:local && npm run build:schemas && npm run build:crosswalks && npm run build:meta && npm run build:pages",
-    "test": "node --test scripts/lib/scoring.test.js"
+    "test": "node --test scripts/lib/scoring.test.js scripts/lib/stats.test.js"
   },
   "devDependencies": {
     "ajv": "^8.20.0",

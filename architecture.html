@@ -152,7 +152,7 @@ and a detailed view for developers and security engineers implementing the stand
         <rect class="b-teal-h d-box" x="150" y="200" width="620" height="96" rx="12"/>
         <text class="t-title" x="460" y="234" text-anchor="middle" style="font-size:16px;">AVE — Agentic Vulnerability Enumeration</text>
         <text class="t-sub" x="460" y="258" text-anchor="middle">The behavioral classification standard for agentic AI components</text>
-        <text class="t-sub" x="460" y="278" text-anchor="middle">Stable IDs · AIVSS v0.8 scored · behavioral fingerprints</text>
+        <text class="t-sub" x="460" y="278" text-anchor="middle">Stable ids · AIVSS-scored · behavioral fingerprints</text>
 
         <path class="edge" stroke="#3d524a" stroke-width="1.5" fill="none" d="M250 296 L210 340" marker-end="url(#ar1)"/>
         <path class="edge" stroke="#3d524a" stroke-width="1.5" fill="none" d="M460 296 L460 340" marker-end="url(#ar1)"/>
@@ -160,22 +160,22 @@ and a detailed view for developers and security engineers implementing the stand
 
         <!-- pillars -->
         <rect class="b-teal d-box" x="40" y="344" width="260" height="112" rx="10"/>
-        <text class="t-title" x="62" y="372">Trusted frameworks</text>
-        <text class="t-sub" x="62" y="396">OWASP MCP Top 10</text>
-        <text class="t-sub" x="62" y="416">MITRE ATLAS</text>
-        <text class="t-sub" x="62" y="436">OWASP AIVSS v0.8</text>
+        <text class="t-title" x="62" y="372">Framework mappings</text>
+        <text class="t-sub" x="62" y="396">OWASP MCP and Agentic Top 10</text>
+        <text class="t-sub" x="62" y="416">MITRE ATLAS · NIST AI RMF</text>
+        <text class="t-sub" x="62" y="436">OWASP AIVSS scoring</text>
 
         <rect class="b-teal d-box" x="330" y="344" width="260" height="112" rx="10"/>
-        <text class="t-title" x="352" y="372">Scanner interop</text>
-        <text class="t-sub" x="352" y="396">Bawbel · SkillSpector</text>
-        <text class="t-sub" x="352" y="416">ClawScan · others</text>
-        <text class="t-sub" x="352" y="436">one shared vocabulary</text>
+        <text class="t-title" x="352" y="372">Implementations</text>
+        <text class="t-sub" x="352" y="396">Tools map their rules to ids</text>
+        <text class="t-sub" x="352" y="416">Crosswalks live in the repo</text>
+        <text class="t-sub" x="352" y="436">Detection rules stay in each tool</text>
 
         <rect class="b-teal d-box" x="620" y="344" width="260" height="112" rx="10"/>
-        <text class="t-title" x="642" y="372">Open governance</text>
+        <text class="t-title" x="642" y="372">Open standard</text>
         <text class="t-sub" x="642" y="396">Apache 2.0</text>
-        <text class="t-sub" x="642" y="416">Path to OWASP project</text>
-        <text class="t-sub" x="642" y="436">No vendor lock-in</text>
+        <text class="t-sub" x="642" y="416">Open schema and records</text>
+        <text class="t-sub" x="642" y="436">Moving to neutral stewardship</text>
 
         <path class="edge" stroke="#3d524a" stroke-width="1.5" fill="none" d="M170 456 L170 492" marker-end="url(#ar1)"/>
         <path class="edge" stroke="#3d524a" stroke-width="1.5" fill="none" d="M460 456 L460 492" marker-end="url(#ar1)"/>
@@ -183,13 +183,13 @@ and a detailed view for developers and security engineers implementing the stand
 
         <!-- prize -->
         <rect class="b-amber d-box" x="40" y="494" width="840" height="56" rx="10"/>
-        <text class="t-title" x="460" y="518" text-anchor="middle">The prize: findings from any tool interoperate</text>
-        <text class="t-sub" x="460" y="538" text-anchor="middle">One vocabulary the field shares — the CVE moment for AI agents</text>
+        <text class="t-title" x="460" y="518" text-anchor="middle">The aim: findings from different tools can be compared</text>
+        <text class="t-sub" x="460" y="538" text-anchor="middle">One shared vocabulary of stable ids</text>
       </svg>
-      <figcaption>Problem → standard → why it wins → the prize</figcaption>
+      <figcaption>Problem → standard → what it connects → the aim</figcaption>
     </figure>
 
-    <p>Conventional standards stop at the package: CVE identifies a flaw, OSV maps it to a version range. Agent component threats have no package and no version; the danger is behavioral. AVE assigns a stable id to each distinct behavioral vulnerability class, scores it with OWASP AIVSS v0.8, and maps it to the frameworks the field already uses. One record catches many textual variants of the same underlying attack.</p>
+    <p>Conventional standards stop at the package: CVE identifies a flaw, OSV maps it to a version range. Agent component threats have no package and no version; the danger is behavioral. AVE assigns a stable id to each distinct behavioral vulnerability class, scores it with OWASP AIVSS, and maps it to the frameworks the field already uses. One record catches many textual variants of the same underlying attack.</p>
 
     <div class="callout gold">
       <span class="k">Why this matters for implementers</span>
@@ -280,12 +280,12 @@ and a detailed view for developers and security engineers implementing the stand
         <text class="t-tiny" x="150" y="58">records/AVE-YYYY-NNNNN.json · validates against the schema version it declares</text>
         <line x1="460" y1="74" x2="460" y2="190" stroke="#5d6f66" stroke-width="1" stroke-dasharray="3 3"/>
         <text class="t-sub" x="62" y="86" style="font-weight:600;fill:#0a4a3a;">Definition (static)</text>
-        <text class="t-sub" x="62" y="110">ave_id · attack_class</text>
+        <text class="t-sub" x="62" y="110">ave_id · status · attack_class</text>
         <text class="t-sub" x="62" y="130">behavioral_fingerprint</text>
         <text class="t-sub" x="62" y="150">severity · aivss{ }</text>
-        <text class="t-sub" x="62" y="170">owasp_mcp · mitre_atlas</text>
-        <text class="t-sub" x="62" y="190">remediation · iocs</text>
-        <text class="t-sub" x="488" y="86" style="font-weight:600;fill:#3a3392;">Evidence declarations (v1.1)</text>
+        <text class="t-sub" x="62" y="170">owasp_mcp · owasp_asi · mitre_atlas · nist_ai_rmf</text>
+        <text class="t-sub" x="62" y="190">references · remediation · iocs</text>
+        <text class="t-sub" x="488" y="86" style="font-weight:600;fill:#3a3392;">Evidence declarations (optional)</text>
         <text class="t-sub" x="488" y="110">confidence_baseline</text>
         <text class="t-sub" x="488" y="130">evidence_kind_default</text>
         <text class="t-sub" x="488" y="150">detection_stage · detection_layer</text>
@@ -336,7 +336,7 @@ and a detailed view for developers and security engineers implementing the stand
         <text class="t-sub" x="492" y="634">→ aveproject.org registry</text>
         <rect class="b-teal d-box" x="40" y="652" width="840" height="56" rx="10"/>
         <text class="t-title" x="62" y="676">Crosswalks</text>
-        <text class="t-sub" x="62" y="696">SkillSpector and ClawScan finding types map to AVE ids — one vocabulary across scanners</text>
+        <text class="t-sub" x="62" y="696">Other tools&rsquo; rule categories, and other frameworks, map to AVE ids; the mappings are kept in this repository</text>
         <path class="edge" stroke="#3d524a" stroke-width="1.5" fill="none" d="M240 530 L240 570" marker-end="url(#ar2)"/>
         <path class="edge" stroke="#3d524a" stroke-width="1.5" fill="none" d="M680 530 L680 570" marker-end="url(#ar2)"/>
       </svg>
@@ -344,7 +344,7 @@ and a detailed view for developers and security engineers implementing the stand
     </figure>
 
     <h3>Anatomy</h3>
-    <p>A record has two halves. The <b>static definition</b> describes the vulnerability class and never changes per scan: <code>ave_id</code> (immutable), <code>attack_class</code>, <code>behavioral_fingerprint</code>, <code>severity</code>, <code>aivss</code>, and the framework mappings. The <b>evidence declarations</b> (added in v1.1) are optional and declare the defaults a scanner uses to assign per-finding metadata.</p>
+    <p>A record has two halves. The <b>static definition</b> describes the vulnerability class and never changes per scan: <code>ave_id</code> (immutable), <code>attack_class</code>, <code>behavioral_fingerprint</code>, <code>severity</code>, <code>aivss</code>, and the framework mappings. The <b>evidence declarations</b> are optional and declare the defaults a scanner uses to assign per-finding metadata. A record also carries a <code>status</code> (<code>active</code>, <code>deprecated</code>, <code>merged</code> or <code>rejected</code>); only <code>active</code> means active, and a record that leaves it keeps its id and its content.</p>
 
     <h3>Validation: the record and conformance fixture relationship</h3>
     <p>Every record should have a <b>positive fixture</b> that any conforming implementation must flag, and a <b>negative fixture</b>: a benign lookalike it must not. The detection logic that decides pass or fail belongs to each implementation, not to this repo; a record with no fixtures gives implementers no shared, neutral way to verify they agree.</p>
@@ -371,9 +371,28 @@ and a detailed view for developers and security engineers implementing the stand
     <h2>Output: how AVE travels</h2>
     <p>A scanner emits findings as <b>SARIF</b> with the <code>ave_id</code> in <code>ruleId</code> and under <code>taxonomies</code>, plus <code>aivss_score</code>, <code>confidence</code>, <code>owasp_mcp</code>, and <code>mitre_atlas</code> in the properties bag. Because SARIF is already consumed by the GitHub Security tab and CI, AVE ids reach those surfaces for free. The open record set can be consumed by any tool, and <a href="crosswalks.html">crosswalks</a> let other scanners&rsquo; finding types resolve to AVE ids.</p>
 
+    <h2 id="lifecycle">From record to release, and what stays stable</h2>
+    <ol>
+      <li><b>Propose.</b> A researcher finds an agentic behavior no record covers, with a citable primary source, and opens an issue. A new <code>ave_id</code> is only for a genuinely distinct behavioral class.</li>
+      <li><b>Write.</b> The record, and two fixtures: one text a conforming implementation must flag, one it must not.</li>
+      <li><b>Validate.</b> CI checks the record against the schema, recomputes its score and requires both fixtures. A maintainer reviews.</li>
+      <li><b>Publish.</b> <code>dist/ave-records-latest.json</code> moves; the next <a href="versions.html">catalog release</a> freezes a copy, tagged and checksummed.</li>
+      <li><b>Implement and consume.</b> Tools map their rules to the id; their findings carry it, and the run names the catalog release it used.</li>
+    </ol>
+    <div class="tbl-wrap"><table class="ref">
+      <thead><tr><th>What you depend on</th><th>What is promised</th></tr></thead>
+      <tbody>
+        <tr><td>An <code>ave_id</code></td><td>Never renumbered, reused or deleted once published. <a href="https://github.com/aveproject/ave/blob/main/docs/specs/scaling-and-governance.md#5-id-stability-policy">ID stability policy</a></td></tr>
+        <tr><td>A record&rsquo;s <code>status</code></td><td>Anything other than <code>active</code> is not active, and new values may appear. <a href="https://github.com/aveproject/ave/blob/main/docs/specs/scaling-and-governance.md#3-deprecation-policy">Deprecation policy</a></td></tr>
+        <tr><td>The schema</td><td>Each published version is frozen, and every record validates against the version it declares. <a href="https://github.com/aveproject/ave/blob/main/docs/specs/scaling-and-governance.md#2-schema-versioning-policy">Versioning policy</a></td></tr>
+        <tr><td>A catalog release</td><td>Never changes after publication; pin one for repeatable scans. <a href="versions.html">Releases</a></td></tr>
+      </tbody>
+    </table></div>
+    <p>The full list, including what is not promised, is in the repository&rsquo;s <a href="https://github.com/aveproject/ave#stability">Stability</a> section.</p>
+
     <div class="callout gold">
       <span class="k">Build your own implementation</span>
-      <p>The schema, records, rules, and fixtures are all open under Apache 2.0. Honor the declares-vs-assigns contract and the SARIF convention, and your tool&rsquo;s findings will interoperate with every other AVE implementation. See the <a href="schema.html">schema reference</a> and the <a href="https://github.com/aveproject/ave">repository</a>.</p>
+      <p>The schema, records and fixtures are open under Apache 2.0; detection rules are not part of the standard and stay in each tool. Honor the declares-vs-assigns contract and the SARIF convention, and your tool&rsquo;s findings will use the same ids as other tools that implement AVE. See the <a href="schema.html">schema reference</a>, the <a href="implementer-guide.html">implementer guide</a> and the <a href="https://github.com/aveproject/ave">repository</a>.</p>
     </div>
   </div>
 </article>
@@ -413,36 +432,21 @@ and a detailed view for developers and security engineers implementing the stand
   </div>
 </footer>
 
-<script src="records.js"></script>
+<script src="site-meta.js"></script>
 <script>
+// Layer counts come from site-meta.js (scripts/build-site-meta.js), not from loading every record.
 (function () {
-  function fillLayerCounts() {
-    if (!window.RECORDS || !window.RECORDS.length) return;
-    var total   = window.RECORDS.length;
-    var counts  = {};
-    window.RECORDS.forEach(function (r) {
-      var layer = r.detection_layer || "content";
-      counts[layer] = (counts[layer] || 0) + 1;
-    });
-    // fill total spans
-    document.querySelectorAll("[data-layer-total]").forEach(function (el) {
-      el.textContent = total;
-    });
-    // fill per-layer spans
-    document.querySelectorAll("[data-layer-count]").forEach(function (el) {
-      var layer = el.getAttribute("data-layer-count");
-      el.textContent = counts[layer] || 0;
-    });
-  }
-  // records.js may load before or after this script
-  if (window.RECORDS) {
-    fillLayerCounts();
-  } else {
-    window.addEventListener("load", fillLayerCounts);
-  }
+  var meta = window.AVE_SITE_META;
+  if (!meta || !meta.stats) return;
+  var layers = meta.stats.layers;
+  document.querySelectorAll("[data-layer-total]").forEach(function (el) {
+    el.textContent = meta.stats.total;
+  });
+  document.querySelectorAll("[data-layer-count]").forEach(function (el) {
+    el.textContent = layers[el.getAttribute("data-layer-count")] || 0;
+  });
 })();
 </script>
-<script src="site-meta.js"></script>
 <script src="version-strip.js"></script>
 </body>
 </html>
