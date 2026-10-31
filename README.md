@@ -82,7 +82,10 @@ deploy workflow regenerates them on every deploy and they are listed in
   other and the schema, and the numbers come from the records. If those
   documents disagree, the build fails and the previous page stays live. A
   record whose own numbers disagree with them is a build warning, counted on
-  the page. `npm test` covers this.
+  the page. `npm test` covers this. The page understands the 1.x equation and
+  OWASP AIVSS v0.8 (schema 2.x), whichever the documents state; one that states
+  neither stops the build. The 1.x support is temporary, see the comment above
+  `EQUATIONS`.
 
 Never edit or commit these. A committed copy is overwritten at deploy time, so
 it can only mislead whoever reads it. After publishing the schema files the
