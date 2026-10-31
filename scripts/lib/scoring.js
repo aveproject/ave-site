@@ -12,7 +12,7 @@
  *   every number, example and distribution            the records the registry shows
  *
  * The documents are read, never trusted. When they disagree with each other, or
- * with the arithmetic coded here, buildScoring() throws and the deploy stops
+ * state an equation this module does not know (EQUATIONS), buildScoring() throws and the deploy stops
  * instead of publishing a page that is wrong. A record that disagrees with the
  * documents does not stop the deploy (aveproject/ave's own CI owns that); it comes
  * back as a warning and the page counts it.
@@ -25,7 +25,18 @@ const fs = require("fs");
 const path = require("path");
 
 const BANDS = ["CRITICAL", "HIGH", "MEDIUM", "LOW"];
-const FORMULA = "AIVSS = ((CVSS_Base + AARS) / 2) × ThM × Mitigation_Factor";
+// The equations this page can explain and recompute. The ave repo's documents must state one of them exactly;
+// any other stops the build, because the arithmetic below would be wrong for it.
+// Both are here so this page keeps building across the move to schema 2.0.0 (aveproject/ave#399): it must be deployed
+// before the ave repo's documents change. Once 2.0.0 has shipped and the page is built from it, delete ave1 and the
+// `eq === "v08"` branches.
+const EQUATIONS = {
+  // schema 1.x: the AIVSS v0.5 equation with the v0.8 Mitigation_Factor added (aveproject/ave#395)
+  ave1: { text: "AIVSS = ((CVSS_Base + AARS) / 2) × ThM × Mitigation_Factor" },
+  // schema 2.x: OWASP AIVSS v0.8, sections 3.3 to 3.5
+  v08: { text: "AARS = (10 - CVSS_Base) × (Factor_Sum / 10) × ThM AIVSS = (CVSS_Base + AARS) × Mitigation_Factor" },
+};
+const equationOf = (formula) => Object.keys(EQUATIONS).find((k) => EQUATIONS[k].text === formula) || null;
 const REPO = "https://github.com/aveproject/ave";
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -112,9 +123,10 @@ function parseReadme(md) {
   if (!line) throw new Error(`${where} has no "ThM ... valid values" line`);
   const thm = [...line[1].matchAll(/`([0-9.]+)` \(([^)]*)\)/g)].map((m) => ({ shown: m[1], value: Number(m[1]), meaning: m[2].trim() }));
   if (!thm.length) throw new Error(`${where}: could not read the ThM values from "${line[1].trim()}"`);
+  const keyColumn = factorTable.header.findIndex((h) => /^ave key$/i.test(plain(h)));
   return {
     formula: normFormula(firstFence(s, where)),
-    factors: factorTable.rows.map((r) => snake(r[1])),
+    factors: factorTable.rows.map((r) => (keyColumn === -1 ? snake(r[1]) : plain(r[keyColumn]))),
     thm,
     bands: parseBands(bandTable.rows),
   };
@@ -147,12 +159,17 @@ function parseBands(rows) {
 // What: the disagreements between the documents, and between them and the arithmetic coded here
 function crossCheck(contributing, readme, schema) {
   const problems = [];
-  if (contributing.formula !== FORMULA) problems.push(`CONTRIBUTING.md states the formula as "${contributing.formula}"; this page is built for "${FORMULA}"`);
-  if (readme.formula !== FORMULA) problems.push(`README.md states the formula as "${readme.formula}"; this page is built for "${FORMULA}"`);
+  const known = Object.values(EQUATIONS).map((e) => `"${e.text}"`).join(" or ");
+  const eqC = equationOf(contributing.formula);
+  const eqR = equationOf(readme.formula);
+  if (!eqC) problems.push(`CONTRIBUTING.md states the equation as "${contributing.formula}"; this page is built for ${known}`);
+  if (!eqR) problems.push(`README.md states the equation as "${readme.formula}"; this page is built for ${known}`);
+  if (eqC && eqR && eqC !== eqR) problems.push(`the equations differ: CONTRIBUTING.md states "${contributing.formula}"; README.md states "${readme.formula}"`);
 
   const schemaFactors = Object.keys(schema.properties.aivss.properties.aarf.properties);
   const contribFactors = contributing.factors.map((f) => f.name);
-  const same = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
+  // the same factors, once each; the order is presentation (the README lists OWASP's order, the schema its own)
+  const same = (a, b) => [...a].sort().join() === [...b].sort().join();
   if (!same(contribFactors, schemaFactors)) problems.push(`factors differ: CONTRIBUTING.md lists ${contribFactors.join(", ")}; the schema has ${schemaFactors.join(", ")}`);
   if (!same(readme.factors, schemaFactors)) problems.push(`factors differ: README.md lists ${readme.factors.join(", ")}; the schema has ${schemaFactors.join(", ")}`);
 
@@ -170,20 +187,35 @@ function bandFor(bands) {
   return (score) => (score >= bands.CRITICAL.min ? "CRITICAL" : score >= bands.HIGH.min ? "HIGH" : score >= bands.MEDIUM.min ? "MEDIUM" : "LOW");
 }
 
-const compute = (a) => ((a.cvss_base + a.aars) / 2) * a.thm * a.mitigation_factor;
+const factorSum = (a) => Object.values(a.aarf || {}).reduce((x, y) => x + y, 0);
+
+// What: the aars and the unrounded score a record's own inputs give under one equation
+// How:  v0.8: aars is the uplift (10 - CVSS_Base) x (Factor_Sum / 10) x ThM and the score adds it to the base;
+//       ave1: aars is the plain sum of the factors and the score averages it with the base
+function derive(eq, a) {
+  if (!a.aarf) {
+    return { aars: a.aars, raw: eq === "v08" ? (a.cvss_base + a.aars) * a.mitigation_factor : ((a.cvss_base + a.aars) / 2) * a.thm * a.mitigation_factor };
+  }
+  const sum = factorSum(a);
+  if (eq === "v08") {
+    const aars = (10 - a.cvss_base) * (sum / 10) * a.thm;
+    return { aars, raw: (a.cvss_base + aars) * a.mitigation_factor };
+  }
+  return { aars: sum, raw: ((a.cvss_base + sum) / 2) * a.thm * a.mitigation_factor };
+}
 
 // What: each way a record's own numbers disagree with the documents, as sentences
 // Why:  the page says "recomputed from each record's own inputs"; it should be true, and say so when not
 // How:  a stored score is the formula rounded to one decimal, so it sits within 0.05 of it
-function checkRecords(records, bandOf, thmValues) {
+function checkRecords(records, bandOf, thmValues, eq) {
   const problems = [];
   for (const r of records) {
     const a = r.aivss;
     const id = r.ave_id;
-    const sum = Object.values(a.aarf || {}).reduce((x, y) => x + y, 0);
-    if (a.aarf && Math.abs(sum - a.aars) > 1e-9) problems.push(`${id}: aars is ${a.aars} but its aarf factors sum to ${trim(sum)}`);
-    const raw = compute(a);
-    if (Math.abs(raw - a.aivss_score) > 0.0501) problems.push(`${id}: stored score ${a.aivss_score}, the formula gives ${trim(raw)}`);
+    const { aars, raw } = derive(eq, a);
+    // v0.8 records store aars to four decimals; the 1.x sum is exact
+    if (a.aarf && Math.abs(aars - a.aars) > 6e-5) problems.push(`${id}: aars is ${a.aars} but its inputs give ${trim(aars)}`);
+    if (Math.abs(raw - a.aivss_score) > 0.0501) problems.push(`${id}: stored score ${a.aivss_score}, the equation gives ${trim(raw)}`);
     if (r.severity !== bandOf(a.aivss_score)) problems.push(`${id}: severity ${r.severity} but score ${a.aivss_score} is in ${bandOf(a.aivss_score)}`);
     if (!thmValues.includes(a.thm)) problems.push(`${id}: ThM ${a.thm} is not one of the documented values ${thmValues.join(", ")}`);
   }
@@ -212,8 +244,12 @@ function summarize(records, factors, bandOf) {
     return [f, { above: values.filter((v) => v > 0).length, full: values.filter((v) => v === 1).length, mean: values.reduce((x, y) => x + y, 0) / (values.length || 1) }];
   }));
   const severeBase = scored.filter((r) => r.aivss.cvss_base >= 9);
+  const uplift = scored.map((r) => r.aivss.aars);
+  const mean = (list) => list.reduce((x, y) => x + y, 0) / (list.length || 1);
   return {
     total: scored.length,
+    uplift: { min: Math.min(...uplift), max: Math.max(...uplift), mean: mean(uplift) },
+    meanScore: mean(scored.map((r) => r.aivss.aivss_score)),
     bands, bins, factor,
     thm: count("thm"),
     mitigation: count("mitigation_factor"),
@@ -226,31 +262,40 @@ function summarize(records, factors, bandOf) {
 
 // ── the page ──────────────────────────────────────────────────────────────────
 
-function renderFormula(schema) {
+// A schema range: min to max, or the exact values when the schema lists them
+const allowed = (p) => (p.enum ? `one of ${p.enum.map(fmt).join(", ")}` : `${p.minimum} to ${p.maximum}`);
+
+function renderFormula(schema, eq) {
   const a = schema.properties.aivss.properties;
-  const range = (p) => `${p.minimum} to ${p.maximum}`;
-  const terms = [
-    ["CVSS_Base", "cvss_base", a.cvss_base],
-    ["AARS", "aars", a.aars],
-    ["ThM", "thm", a.thm],
-    ["Mitigation_Factor", "mitigation_factor", a.mitigation_factor],
-  ];
-  return `<div class="codeblock"><span class="g">AIVSS</span> = ((<span class="g">CVSS_Base</span> + <span class="g">AARS</span>) / 2) &times; <span class="g">ThM</span> &times; <span class="g">Mitigation_Factor</span></div>\n` +
-    `    <p>Four inputs. The ranges and descriptions are the schema's.</p>\n` +
+  const factorMax = Object.keys(a.aarf.properties).length;
+  const code = eq === "v08"
+    ? `<div class="codeblock"><span class="g">AARS</span>  = (10 - <span class="g">CVSS_Base</span>) &times; (<span class="g">Factor_Sum</span> / 10) &times; <span class="g">ThM</span>\n<span class="g">AIVSS</span> = (<span class="g">CVSS_Base</span> + <span class="g">AARS</span>) &times; <span class="g">Mitigation_Factor</span></div>`
+    : `<div class="codeblock"><span class="g">AIVSS</span> = ((<span class="g">CVSS_Base</span> + <span class="g">AARS</span>) / 2) &times; <span class="g">ThM</span> &times; <span class="g">Mitigation_Factor</span></div>`;
+  const terms = [["CVSS_Base", "cvss_base", allowed(a.cvss_base), a.cvss_base.description]];
+  if (eq === "v08") terms.push(["Factor_Sum", "aarf", `0 to ${factorMax}`, a.aarf.description]);
+  terms.push(["AARS", "aars", allowed(a.aars), a.aars.description], ["ThM", "thm", allowed(a.thm), a.thm.description],
+    ["Mitigation_Factor", "mitigation_factor", allowed(a.mitigation_factor), a.mitigation_factor.description]);
+  const rounding = eq === "v08"
+    ? `    <p>The score a record carries is the result rounded half up to one decimal, as the OWASP document specifies: 9.85 is 9.9. <a href="${REPO}/blob/main/scripts/validate_records.py"><code>scripts/validate_records.py</code></a> works in exact decimal arithmetic and computes the score from the exact uplift, while <code>aivss.aars</code> is stored to four decimals.</p>`
+    : `    <p>The score a record carries is the result rounded to one decimal, the way <a href="${REPO}/blob/main/scripts/validate_records.py"><code>scripts/validate_records.py</code></a> computes it with Python's <code>round()</code> on the floating-point result. A value that looks like a tie can therefore round either way: 9.25 is stored as 9.2.</p>`;
+  return `${code}\n` +
+    `    <p>${terms.length === 5 ? "Five terms" : "Four inputs"}. The ranges and descriptions are the schema's.</p>\n` +
     `    <div class="tbl-wrap"><table class="ref"><thead><tr><th>Term</th><th>Range</th><th>What it is</th></tr></thead><tbody>\n` +
-    terms.map(([term, field, p]) => `      <tr><td class="mono">${term}</td><td class="mono">${range(p)}</td><td>${esc(p.description)} Stored as <code>aivss.${field}</code>.</td></tr>`).join("\n") +
-    `\n    </tbody></table></div>\n` +
-    `    <p>The score a record carries is the result rounded to one decimal, the way <a href="${REPO}/blob/main/scripts/validate_records.py"><code>scripts/validate_records.py</code></a> computes it with Python's <code>round()</code> on the floating-point result. A value that looks like a tie can therefore round either way: 9.25 is stored as 9.2.</p>`;
+    terms.map(([term, field, range, description]) => `      <tr><td class="mono">${term}</td><td class="mono">${esc(range)}</td><td>${esc(description)} Stored as <code>aivss.${field}</code>.</td></tr>`).join("\n") +
+    `\n    </tbody></table></div>\n` + rounding;
 }
 
-function renderFactors(contributing, summary) {
+function renderFactors(contributing, summary, eq) {
   const rows = contributing.factors.map((f) => {
     const s = summary.factor[f.name];
     return `      <tr><td class="mono">${esc(f.name)}</td><td>${esc(f.when)}</td>` +
       `<td class="num">${s.above} of ${summary.total}</td>` +
       `<td class="num"><span class="bar" role="img" aria-label="mean ${s.mean.toFixed(2)} of 1"><i style="width:${Math.round(s.mean * 100)}%"></i></span> ${s.mean.toFixed(2)}</td></tr>`;
   });
-  return `<p>AARS is the sum of ten factors, each scored 0.0 (not applicable) to 1.0 (fully applicable). They are stored in <code>aivss.aarf</code>, and <code>aivss.aars</code> is their sum. The wording is CONTRIBUTING's; the last two columns are measured on the records.</p>\n` +
+  const intro = eq === "v08"
+    ? `<p>Factor_Sum is the sum of ten factors, each scored 0 (none), 0.5 (partial) or 1 (full). They are stored in <code>aivss.aarf</code> and feed AARS, the agentic uplift. The wording is CONTRIBUTING's; the last two columns are measured on the records.</p>`
+    : `<p>AARS is the sum of ten factors, each scored 0.0 (not applicable) to 1.0 (fully applicable). They are stored in <code>aivss.aarf</code>, and <code>aivss.aars</code> is their sum. The wording is CONTRIBUTING's; the last two columns are measured on the records.</p>`;
+  return intro + `\n` +
     `    <div class="tbl-wrap"><table class="ref stack-sm"><thead><tr><th>Factor</th><th>Score 1.0 when&hellip;</th><th class="num">Scored above 0</th><th class="num">Mean score</th></tr></thead><tbody>\n` +
     rows.join("\n") + `\n    </tbody></table></div>`;
 }
@@ -264,7 +309,7 @@ function renderThm(contributing, schema, summary) {
     .concat(stray.map(([v, n]) => `      <tr><td class="mono">${esc(fmt(v))}</td><td>not a documented value</td><td class="num">${n} of ${summary.total}</td></tr>`));
   const mf = [...summary.mitigation.entries()].sort((x, y) => y[0] - x[0]);
   const mfRows = mf.map(([v, n]) => `      <tr><td class="mono">${esc(fmt(v))}</td><td class="num">${n} of ${summary.total}</td></tr>`);
-  return `<p><strong>ThM</strong>: ${esc(a.thm.description)} The schema allows ${a.thm.minimum} to ${a.thm.maximum}; the AVE documents list ${contributing.thm.length}. How often each is used:</p>\n` +
+  return `<p><strong>ThM</strong>: ${esc(a.thm.description)} The schema allows ${allowed(a.thm)}; the AVE documents list ${plural(contributing.thm.length, "value", "values")}. How often each is used:</p>\n` +
     `    <div class="tbl-wrap"><table class="ref"><thead><tr><th>ThM</th><th>When to use it</th><th class="num">Records</th></tr></thead><tbody>\n` +
     thmRows.join("\n") + `\n    </tbody></table></div>\n` +
     `    <p><strong>Mitigation_Factor</strong>: ${esc(a.mitigation_factor.description)} The values in use, and how often:</p>\n` +
@@ -273,7 +318,7 @@ function renderThm(contributing, schema, summary) {
     `    <p>Guidance on choosing between them is in the repository's <a href="${REPO}/blob/main/references/aivss-scoring.md">scoring reference</a>.</p>`;
 }
 
-function renderBands(readme, summary) {
+function renderBands(readme, summary, eq) {
   const rows = BANDS.map((b) => {
     const n = summary.bands[b];
     return `      <tr><td><span class="sev ${b}">${b}</span></td><td class="mono">${esc(readme.bands[b].range)}</td><td>${esc(readme.bands[b].meaning)}</td>` +
@@ -284,7 +329,10 @@ function renderBands(readme, summary) {
   const hist = summary.bins.map((n, i) => `<div class="col"><b>${n}</b><i class="b-${bandOf(i)}" style="height:${Math.round((100 * n) / peak)}%"></i><span>${i}</span></div>`).join("");
   const alt = summary.bins.map((n, i) => `${i} to ${i}.9: ${n}`).join(", ");
   const sb = summary.severeBase;
-  const callout = sb.total ?
+  const floor = eq === "v08" && summary.total ?
+    `    <div class="callout">\n      <span class="k">The CVSS base is the floor</span>\n` +
+    `      <p>The equation adds the agentic uplift to the CVSS base score, so a record never scores below its <code>cvss_base</code> times its <code>mitigation_factor</code>. In the published records the uplift (<code>aars</code>) runs from ${trim(summary.uplift.min)} to ${trim(summary.uplift.max)} and averages ${summary.uplift.mean.toFixed(2)}, against an average score of ${summary.meanScore.toFixed(1)}: the base decides most of the score, so an honest CVSS v4.0 assessment matters most.</p>\n    </div>\n` : "";
+  const callout = eq === "v08" ? floor : sb.total ?
     `    <div class="callout">\n      <span class="k">A severe flaw is not a severe score</span>\n` +
     `      <p>The repository's scoring reference says AARF rewards breadth of amplification, not just raw impact, so a narrow, single-mechanism class with a near-maximum <code>cvss_base</code> still averages down. Here, ${plural(sb.total, "record has", "records have")} a <code>cvss_base</code> of 9.0 or more: ` +
     BANDS.filter((b) => sb.bands[b]).map((b) => `${sb.bands[b]} ${b}`).join(", ") + `. The honest computed result is reported, with the reason in <code>aivss.notes</code>.</p>\n    </div>\n` : "";
@@ -295,9 +343,9 @@ function renderBands(readme, summary) {
     `    <figcaption>Records by whole-number score (2.0 to 2.9 is column 2)</figcaption></figure>\n` + callout;
 }
 
-function renderCalc(record, bandOf, factors) {
+function renderCalc(record, bandOf, factors, eq) {
   const a = record.aivss;
-  const raw = compute(a);
+  const { aars, raw } = derive(eq, a);
   const stored = a.aivss_score;
   const band = bandOf(stored);
   const id = esc(record.ave_id);
@@ -306,31 +354,37 @@ function renderCalc(record, bandOf, factors) {
     return `<li><span class="mono">${esc(f)}</span><span class="bar" role="img" aria-label="${fmt(v)} of 1"><i style="width:${Math.round(v * 100)}%"></i></span><b>${fmt(v)}</b></li>`;
   }).join("");
   const rounded = trim(raw) === String(stored) ? "" : ` &rarr; stored as <strong>${stored}</strong>`;
+  const sum = factorSum(a);
+  const steps = eq === "v08"
+    ? `        <li><div><strong>AARF factors</strong>, summing to Factor_Sum = ${fmt(sum)}<ul class="factors">${list}</ul></div></li>\n` +
+      `        <li><div><strong>Uplift</strong><div class="eq">AARS = (10 - ${fmt(a.cvss_base)}) &times; (${fmt(sum)} / 10) &times; ${fmt(a.thm)} = ${trim(aars)}</div></div></li>\n` +
+      `        <li><div><strong>Compose</strong><div class="eq">AIVSS = (${fmt(a.cvss_base)} + ${trim(aars)}) &times; ${fmt(a.mitigation_factor)} = ${trim(raw)}${rounded}</div></div></li>\n`
+    : `        <li><div><strong>AARF factors</strong>, summing to AARS = ${fmt(a.aars)}<ul class="factors">${list}</ul></div></li>\n` +
+      `        <li><div><strong>Compose</strong><div class="eq">((${fmt(a.cvss_base)} + ${fmt(a.aars)}) / 2) &times; ${fmt(a.thm)} &times; ${fmt(a.mitigation_factor)} = ${trim(raw)}${rounded}</div></div></li>\n`;
   return `    <article class="calc" aria-labelledby="calc-${id}">\n` +
     `      <header><a class="aveid" href="registry.html#${id}">${id}</a><span class="sev ${band}">${band}</span><h3 id="calc-${id}">${esc(record.title)}</h3></header>\n` +
     `      <ol>\n` +
     `        <li><div><strong>Inputs</strong><dl class="inputs"><div><dt>CVSS_Base</dt><dd>${fmt(a.cvss_base)}</dd></div><div><dt>ThM</dt><dd>${fmt(a.thm)}</dd></div><div><dt>Mitigation_Factor</dt><dd>${fmt(a.mitigation_factor)}</dd></div></dl></div></li>\n` +
-    `        <li><div><strong>AARF factors</strong>, summing to AARS = ${fmt(a.aars)}<ul class="factors">${list}</ul></div></li>\n` +
-    `        <li><div><strong>Compose</strong><div class="eq">((${fmt(a.cvss_base)} + ${fmt(a.aars)}) / 2) &times; ${fmt(a.thm)} &times; ${fmt(a.mitigation_factor)} = ${trim(raw)}${rounded}</div></div></li>\n` +
+    steps +
     `      </ol>\n` +
     (a.notes ? `      <p class="why"><strong>The record's note on its scoring:</strong> ${esc(a.notes)}</p>\n` : "") +
     `    </article>`;
 }
 
-function renderExamples(summary, bandOf, factors) {
+function renderExamples(summary, bandOf, factors, eq) {
   const { highest, lowest } = summary;
   if (!highest) return "<p>No scored records.</p>";
   const same = highest.ave_id === lowest.ave_id;
   const intro = same ? "<p>The only scored record.</p>"
     : `<p>The two ends of the published set: the highest score (${highest.aivss.aivss_score}) and the lowest (${lowest.aivss.aivss_score}). Each is built from the record's own <code>aivss</code> object, so the page follows the records if they are re-scored.</p>`;
-  return intro + "\n" + renderCalc(highest, bandOf, factors) + (same ? "" : "\n" + renderCalc(lowest, bandOf, factors));
+  return intro + "\n" + renderCalc(highest, bandOf, factors, eq) + (same ? "" : "\n" + renderCalc(lowest, bandOf, factors, eq));
 }
 
-function renderChecked(summary, records, problems, sha) {
+function renderChecked(summary, records, problems, sha, eq) {
   const bad = new Set(problems.map((p) => p.split(":")[0]));
   const ok = records.length - [...bad].filter((id) => records.some((r) => r.ave_id === id)).length;
   return `<p class="checked">Recomputed when this page was built, from <a href="${REPO}/tree/${esc(sha)}">aveproject/ave@${esc(sha.slice(0, 7))}</a>: ` +
-    `${ok} of ${records.length} records have an aars equal to the sum of their factors, a stored score within rounding of the formula, a severity that matches its band, and a documented ThM.</p>`;
+    `${ok} of ${records.length} records have an aars equal to ${eq === "v08" ? "the uplift their inputs give" : "the sum of their factors"}, a stored score within rounding of the equation, a severity that matches its band, and a documented ThM.</p>`;
 }
 
 // What: the filled-in pieces of scoring.html, and the warnings found on the way
@@ -341,24 +395,26 @@ function buildScoring({ contributing, readme, schema, records, sha }) {
   const problems = crossCheck(c, r, schema);
   if (problems.length) throw new Error(`the AVE documents disagree, so the scoring page cannot be built:\n  - ${problems.join("\n  - ")}`);
 
+  const eq = equationOf(c.formula);
   const factors = c.factors.map((f) => f.name);
   const bandOf = bandFor(r.bands);
   const scored = records.filter((x) => x.aivss);
-  const warnings = checkRecords(scored, bandOf, c.thm.map((t) => t.value));
+  const warnings = checkRecords(scored, bandOf, c.thm.map((t) => t.value), eq);
   const summary = summarize(scored, factors, bandOf);
   const spec = schema.properties.aivss.properties.spec_version.const;
   return {
     warnings,
     summary,
+    equation: eq,
     values: {
       "{{AIVSS_SPEC}}": esc(spec),
       "{{RECORD_COUNT}}": String(summary.total),
-      "<!-- ave:scoring-formula -->": renderFormula(schema),
-      "<!-- ave:scoring-factors -->": renderFactors(c, summary),
+      "<!-- ave:scoring-formula -->": renderFormula(schema, eq),
+      "<!-- ave:scoring-factors -->": renderFactors(c, summary, eq),
       "<!-- ave:scoring-thm -->": renderThm(c, schema, summary),
-      "<!-- ave:scoring-bands -->": renderBands(r, summary),
-      "<!-- ave:scoring-examples -->": renderExamples(summary, bandOf, factors),
-      "<!-- ave:scoring-checked -->": renderChecked(summary, scored, warnings, sha),
+      "<!-- ave:scoring-bands -->": renderBands(r, summary, eq),
+      "<!-- ave:scoring-examples -->": renderExamples(summary, bandOf, factors, eq),
+      "<!-- ave:scoring-checked -->": renderChecked(summary, scored, warnings, sha, eq),
     },
   };
 }
@@ -372,4 +428,4 @@ function loadSources(aveDir) {
   };
 }
 
-module.exports = { buildScoring, loadSources, parseContributing, parseReadme, parseBands, crossCheck, checkRecords, summarize, bandFor, section, tables, FORMULA };
+module.exports = { buildScoring, loadSources, parseContributing, parseReadme, parseBands, crossCheck, checkRecords, summarize, bandFor, section, tables, derive, equationOf, EQUATIONS };
